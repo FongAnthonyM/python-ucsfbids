@@ -1,0 +1,76 @@
+[tool.poetry]
+name = "templatepackage"
+version = "0.0.0"
+description = "Basic object templates."
+authors = ["Anthony Fong <FongAnthonyM@gmail.com>"]
+license = "MIT"
+readme = "README.rst"
+homepage = "https://github.com/fongant/python-templatepackage"
+repository = "https://github.com/fongant/python-templatepackage"
+documentation = "https://python-templatepackage.readthedocs.io"
+packages = [
+    { include = "templatepackage", from = "src" },
+]
+classifiers = [
+    "Development Status :: 1 - Prototype",
+]
+
+[tool.poetry.urls]
+Changelog = "https://github.com/fongant/python-templatepackage/releases"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+click = "^8.0.3"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.0.1"
+coverage = {extras = ["toml"], version = "^6.3"}
+safety = "^1.10.3"
+mypy = "^0.910"
+typeguard = "^2.13.2"
+xdoctest = {extras = ["colors"], version = "^0.15.10"}
+sphinx = "^4.4.0"
+sphinx-autobuild = "^2021.3.14"
+pre-commit = "^2.16.0"
+flake8 = "^4.0.1"
+black = "^22.1"
+flake8-bandit = "^2.1.2"
+flake8-bugbear = "^21.11.29"
+flake8-docstrings = "^1.6.0"
+flake8-rst-docstrings = "^0.2.3"
+pep8-naming = "^0.12.1"
+darglint = "^1.8.1"
+reorder-python-imports = "^2.6.0"
+pre-commit-hooks = "^4.0.1"
+sphinx-rtd-theme = "^1.0.0"
+sphinx-click = "^3.0.2"
+Pygments = "^2.10.0"
+
+[tool.poetry.scripts]
+python-templatepackage = "templatepackage.__main__:main"
+
+[tool.coverage.paths]
+source = ["src", "*/site-packages"]
+
+[tool.coverage.run]
+branch = true
+source = ["templatepackage"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 100
+
+[tool.mypy]
+strict = true
+warn_unreachable = true
+pretty = true
+show_column_numbers = true
+show_error_codes = true
+show_error_context = true
+
+[tool.black]
+line-length = 120
+
+[build-system]
+requires = ["setuptools", "poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

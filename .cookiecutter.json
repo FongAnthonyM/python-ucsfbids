@@ -1,0 +1,12 @@
+{
+  "_template": "gh:cjolowicz/cookiecutter-hypermodern-python",
+  "author": "Anthony Fong",
+  "development_status": "Development Status :: 1 - Prototype",
+  "email": "FongAnthonyM@gmail.com",
+  "friendly_name": "base objects",
+  "github_user": "fongant",
+  "license": "MIT",
+  "package_name": "templatepackage",
+  "project_name": "python-templatepackage",
+  "version": "0.0.0"
+}
