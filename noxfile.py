@@ -30,7 +30,7 @@ except ImportError:
 
 
 # Definitions #
-package = "templatepackage"
+package = "ucsfbids"
 python_versions = ["3.10"]
 nox.needs_version = ">= 2021.6.6"
 nox.options.sessions = (
