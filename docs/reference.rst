@@ -6,8 +6,8 @@ Reference
     :backlinks: none
 
 
-templatepackage.__main__
+ucsfbids.__main__
 --------------------
 
-.. automodule:: templatepackage.__main__
+.. automodule:: ucsfbids.__main__
    :members:

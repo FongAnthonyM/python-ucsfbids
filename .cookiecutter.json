@@ -6,7 +6,7 @@
   "friendly_name": "base objects",
   "github_user": "fongant",
   "license": "MIT",
-  "package_name": "templatepackage",
-  "project_name": "python-templatepackage",
+  "package_name": "ucsfbids",
+  "project_name": "python-ucsfbids",
   "version": "0.0.0"
 }

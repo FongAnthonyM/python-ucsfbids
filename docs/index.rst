@@ -13,4 +13,4 @@
    contributing
    Code of Conduct <codeofconduct>
    License <license>
-   Changelog <https://github.com/fongant/python-templatepackage/releases>
+   Changelog <https://github.com/fongant/python-ucsfbids/releases>
