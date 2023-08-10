@@ -15,7 +15,7 @@ __email__ = __email__
 # Standard Libraries #
 from baseobjects import BaseComposite
 from baseobjects.cachingtools import CachingObject, timed_keyless_cache
-import pathlib
+from pathlib import Path
 from typing import Any
 
 
@@ -46,13 +46,14 @@ class CDFSSession(BaseSession):
     # Construction/Destruction
     def __init__(
         self,
-        path: pathlib.Path | str | None = None,
+        path: Path | str | None = None,
+        name: str | None = None,
+        parent_path: Path | str | None = None,
         *,
         init: bool = True,
         **kwargs: Any,
     ) -> None:
         # New Attributes #
-
         self.cdfs: CDFS | None = None
 
         # Parent Attributes #
@@ -62,6 +63,8 @@ class CDFSSession(BaseSession):
         if init:
             self.construct(
                 path=path,
+                name=name,
+                parent_path=parent_path,
                 **kwargs,
             )
 
@@ -69,22 +72,35 @@ class CDFSSession(BaseSession):
     # Constructors/Destructors
     def construct(
         self,
-        path: pathlib.Path | str | None = None,
+        path: Path | str | None = None,
+        name: str | None = None,
+        parent_path: Path | str | None = None,
         **kwargs: Any,
     ) -> None:
         """Constructs this object.
 
         Args:
             path: The path to the subject's directory.
+            name: The name of the session.
+            parent_path: The parent path of this session.
         """
 
-        super().construct(**kwargs)
+        super().construct(path=path, name=name, parent_path=parent_path, **kwargs)
 
-    def create_anat(self) -> None:
-        pass
+    def generate_content_file_name(self):
+        return f"{self.full_name}_contents.sqlite3"
+
+    def require_cdfs(self, **kwargs: Any) -> CDFS:
+        self.cdfs = cdfs = self.cdfs_type(
+            path=self.ieeg_path,
+            name=self.full_name,
+            mode=self._mode,
+            contents_name=self.generate_content_file_name(),
+            **kwargs,
+        )
+        return cdfs
 
     def create_ieeg(self) -> None:
-        pass
-
-    def require_cdfs(self) -> None:
-        self.cdfs = self.cdfs_type(path=self.ieeg_path, s_id=self.full_name, mode=self._mode)
+        self.ieeg_path.mkdir(exist_ok=True)
+        self.require_cdfs(open_=True, create=True)
+        self.cdfs.close()

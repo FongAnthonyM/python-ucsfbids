@@ -13,13 +13,14 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
-from baseobjects import BaseComposite
-from baseobjects.cachingtools import CachingObject, timed_keyless_cache
+import json
 from pathlib import Path
 from typing import Any
 
 
 # Third-Party Packages #
+from baseobjects import BaseComposite
+from baseobjects.cachingtools import CachingObject, timed_keyless_cache
 
 
 # Local Packages #
@@ -37,6 +38,10 @@ class BaseSession(CachingObject, BaseComposite):
     Args:
 
     """
+    default_meta_info: dict = {
+        "SessionType": "Base"
+    }
+
     # Magic Methods #
     # Construction/Destruction
     def __init__(
@@ -52,6 +57,8 @@ class BaseSession(CachingObject, BaseComposite):
         self._path: Path | None = None
         self._is_open: bool = False
         self._mode: str = "r"
+
+        self.meta_info: dict = self.default_meta_info.copy()
 
         self.name: str | None = None
         self.parent_name: str | None = None
@@ -83,6 +90,15 @@ class BaseSession(CachingObject, BaseComposite):
     @property
     def full_name(self) -> str:
         return f"sub-{self.parent_name}_ses-{self.name}"
+
+    @property
+    def meta_info_path(self) -> Path:
+        return self._path / f"{self.full_name}_meta.json"
+
+    @property
+    def anat_path(self) -> Path:
+        """The path to the ieeg data."""
+        return self._path / "anat"
 
     @property
     def ieeg_path(self) -> Path:
@@ -122,8 +138,31 @@ class BaseSession(CachingObject, BaseComposite):
 
         super().construct(**kwargs)
 
+    def create_meta_info(self) -> None:
+        with self.meta_info_path.open("w") as file:
+            json.dump(self.meta_info, file)
+
+    def load_meta_info(self) -> dict:
+        self.meta_info.clear()
+        with self.meta_info_path.open("r") as file:
+            self.meta_info.update(json.load(file))
+        return self.meta_info
+
+    def save_meta_info(self) -> None:
+        with self.meta_info_path.open("w") as file:
+            json.dump(self.meta_info, file)
+
     def create_anat(self) -> None:
-        pass
+        self.anat_path.mkdir(exist_ok=True)
 
     def create_ieeg(self) -> None:
+        self.ieeg_path.mkdir(exist_ok=True)
+
+    def create(self) -> None:
+        self.path.mkdir(exist_ok=True)
+        self.create_meta_info()
+        self.create_anat()
+        self.create_ieeg()
+
+    def export_to_bids(self, path: Path | str) -> None:
         pass
