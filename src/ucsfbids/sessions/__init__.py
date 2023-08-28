@@ -13,5 +13,5 @@ __email__ = __email__
 
 # Imports #
 # Local Packages #
-from .basesession import BaseSession
+from .session import Session
 from .cdfssession import CDFSSession
