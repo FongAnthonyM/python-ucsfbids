@@ -112,7 +112,7 @@ class CDFSSession(Session):
             path=self.ieeg_path,
             name=self.full_name,
             mode=self._mode,
-            contents_name=self.generate_content_file_name(),
+            contents_name=self.generate_contents_file_name(),
             **kwargs,
         )
         return cdfs
