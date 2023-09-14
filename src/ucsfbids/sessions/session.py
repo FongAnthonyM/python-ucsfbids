@@ -21,6 +21,7 @@ from typing import Any
 from baseobjects import BaseComposite
 from baseobjects.cachingtools import CachingObject, timed_keyless_cache
 from baseobjects.objects import DispatchableClass
+import pandas as pd
 
 # Local Packages #
 
@@ -33,8 +34,8 @@ class Session(CachingObject, BaseComposite, DispatchableClass):
     Class Attributes:
         namespace: The namespace of the subclass.
         name: The name of which the subclass will be registered as.
-        registry: A registry of all subclasses of this class.
-        registration: Determines if this class/subclass will be added to the registry.
+        register: A register of all subclasses of this class.
+        registration: Determines if this class/subclass will be added to the register.
         default_meta_info: The default meta information about the session.
 
     Attributes:
@@ -56,7 +57,7 @@ class Session(CachingObject, BaseComposite, DispatchableClass):
     """
 
     namespace: str | None = "base"
-    registry: dict[str, dict[str, type]] = {}
+    register: dict[str, dict[str, type]] = {}
     registration: bool = True
     default_meta_info: dict[str, Any] = {
         "SessionNamespace": "",
@@ -64,7 +65,7 @@ class Session(CachingObject, BaseComposite, DispatchableClass):
     }
 
     # Class Methods #
-    # Registry
+    # register
     @classmethod
     def register_class(cls, namespace: str | None = None, name: str | None = None) -> None:
         """Registers this class with the given namespace and name.
@@ -182,6 +183,11 @@ class Session(CachingObject, BaseComposite, DispatchableClass):
         """The path to the ieeg data."""
         return self._path / "ieeg"
 
+    @property
+    def electrodes_path(self) -> Path:
+        """The path to the meta information json file."""
+        return self.ieeg_path / f"{self.full_name}_electrodes.tsv"
+
     # Instance Methods #
     # Constructors/Destructors
     def construct(
@@ -261,6 +267,14 @@ class Session(CachingObject, BaseComposite, DispatchableClass):
         self.create_meta_info()
         self.create_anat()
         self.create_ieeg()
+
+    def load_electrodes(self) -> pd.DataFrame:
+        """Loads the electrode information from the file.
+
+        Returns:
+            The electrode information.
+        """
+        return pd.read_csv(self.electrodes_path, sep='\t')
 
     def export_to_bids(self, path: Path | str) -> None:
         pass
