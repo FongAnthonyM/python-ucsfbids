@@ -179,6 +179,11 @@ class Session(CachingObject, BaseComposite, DispatchableClass):
         return self._path / "anat"
 
     @property
+    def ct_path(self) -> Path:
+        """The path to the CT data."""
+        return self._path / "ct"
+
+    @property
     def ieeg_path(self) -> Path:
         """The path to the ieeg data."""
         return self._path / "ieeg"
@@ -256,6 +261,10 @@ class Session(CachingObject, BaseComposite, DispatchableClass):
     def create_anat(self) -> None:
         """Creates and sets up the anatomy directory."""
         self.anat_path.mkdir(exist_ok=True)
+
+    def create_ct(self) -> None:
+        """Creates and sets up the anatomy directory."""
+        self.ct_path.mkdir(exist_ok=True)
 
     def create_ieeg(self) -> None:
         """Creates and sets up the ieeg directory."""
