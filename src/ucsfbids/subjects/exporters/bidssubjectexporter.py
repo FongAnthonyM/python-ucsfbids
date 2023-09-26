@@ -44,7 +44,7 @@ class BIDSSubjectExporter(BaseObject):
         # Object Construction #
         if init:
             self.construct(
-                subject=subject
+                subject=subject,
                 **kwargs,
             )
 
