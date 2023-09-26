@@ -71,6 +71,7 @@ class BIDSSubjectExporter(BaseObject):
 
     def export(self, path: Path, name: str) -> None:
         new_path = path / f"sub-{name}"
+        new_path.mkdir(exist_ok=True)
         self.export_sessions(path=new_path, name=name)
 
 
