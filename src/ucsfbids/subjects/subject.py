@@ -154,7 +154,7 @@ class Subject(BaseComposite):
             {s.name: s for p in self.path.iterdir() if p.is_dir() and (s := Session(path=p, mode=m)) is not None},
         )
 
-    def create_export(self, type_: str) -> Any:
+    def create_exporter(self, type_: str) -> Any:
         return self.exporters[type_](subject=self)
 
     def generate_latest_session_name(self) -> str:
