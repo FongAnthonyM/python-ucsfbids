@@ -56,7 +56,7 @@ class CDFSSession(Session):
         init: Determines if this object will construct.
         kwargs: The keyword arguments for inheritance.
     """
-
+    default_exporters: dict[str, type] = {}
     cdfs_type: type[CDFS] = CDFS
 
     # Magic Methods #

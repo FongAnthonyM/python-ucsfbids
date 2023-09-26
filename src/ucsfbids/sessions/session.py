@@ -63,6 +63,7 @@ class Session(CachingObject, BaseComposite, DispatchableClass):
         "SessionNamespace": "",
         "SessionType": "",
     }
+    default_exporters: dict[str, type] = {}
 
     # Class Methods #
     # register
@@ -136,6 +137,8 @@ class Session(CachingObject, BaseComposite, DispatchableClass):
 
         self.name: str | None = None
         self.parent_name: str | None = None
+
+        self.exporters: dict[str, type] = self.default_exporters.copy()
 
         # Parent Attributes #
         super().__init__(init=False)
@@ -287,3 +290,6 @@ class Session(CachingObject, BaseComposite, DispatchableClass):
 
     def export_to_bids(self, path: Path | str) -> None:
         pass
+
+    def create_exporter(self, type_):
+        return self.exporters[type_](session=self)

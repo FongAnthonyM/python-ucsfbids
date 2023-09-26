@@ -45,6 +45,8 @@ class Subject(BaseComposite):
         init: Determines if this object will construct.
         kwargs: The keyword arguments for inheritance if any.
     """
+    default_exporters: dict[str, type] = {}
+
     # Magic Methods #
     # Construction/Destruction
     def __init__(
@@ -65,6 +67,8 @@ class Subject(BaseComposite):
         self.name: str | None = None
 
         self.sessions: dict[str, Session] = {}
+
+        self.exporters: dict[str, type] = self.default_exporters.copy()
 
         # Parent Attributes #
         super().__init__(init=False)
@@ -150,8 +154,8 @@ class Subject(BaseComposite):
             {s.name: s for p in self.path.iterdir() if p.is_dir() and (s := Session(path=p, mode=m)) is not None},
         )
 
-    def export_to_bids(self, path: Path | str) -> None:
-        pass
+    def create_export(self, type_: str) -> Any:
+        return self.exporters[type_](subject=self)
 
     def generate_latest_session_name(self) -> str:
         """Generates a session name for a new latest session.
