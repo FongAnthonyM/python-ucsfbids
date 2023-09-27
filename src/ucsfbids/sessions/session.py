@@ -57,7 +57,6 @@ class Session(CachingObject, DispatchableClass):
         kwargs: The keyword arguments for inheritance if any.
     """
 
-    register_namespace: str | None = "base"
     register: dict[str, dict[str, type]] = {}
     registration: bool = True
     default_meta_info: dict[str, Any] = {

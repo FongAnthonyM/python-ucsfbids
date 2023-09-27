@@ -72,9 +72,11 @@ class SessionBIDSExporter(BaseObject):
     def export(self, path: Path, name: str | None = None) -> None:
         if name is None:
             name = self.session.name
+
+        full_name = f"{path.parts[-1]}_ses-{name}"
         new_path = path / f"ses-{name}"
         new_path.mkdir(exist_ok=True)
-        self.export_modalities(path=new_path, name=name)
+        self.export_modalities(path=new_path, name=full_name)
 
 
 # Assign Exporter
