@@ -28,7 +28,7 @@ from ..modality import Modality
 # Classes #
 class ModalityBIDSExporter(BaseObject):
     export_file_names: set[str, ...] = set()
-    export_exclude_names: set[str, ...] = set()
+    export_exclude_names: set[str, ...] = {"-meta"}
 
     # Magic Methods #
     # Construction/Destruction
@@ -71,9 +71,13 @@ class ModalityBIDSExporter(BaseObject):
 
     def export_all_files(self, path: Path, name: str) -> None:
         for old_path in self.path.iterdir():
-            new_path = path / old_path.name.replace(self.modality.full_name, name)
-            if not new_path.exists():
-                shutil.copy(old_path, new_path)
+            if old_path.is_file():
+                old_name = old_path.name
+                exclude = any(n in old_name for n in self.export_exclude_names)
+                if not exclude:
+                    new_path = path / old_path.name.replace(self.modality.full_name, name)
+                    if not new_path.exists():
+                        shutil.copy(old_path, new_path)
 
     def export_select_files(self, path: Path, name: str) -> None:
         for old_path in self.path.iterdir():
