@@ -66,7 +66,7 @@ class SessionBIDSExporter(BaseObject):
         super().construct(**kwargs)
 
     def export_modalities(self, path: Path, name: str):
-        for session in self.subject.modalities.values():
+        for session in self.session.modalities.values():
             session.create_exporter("BIDS").export(path, name=name)
 
     def export(self, path: Path, name: str) -> None:
