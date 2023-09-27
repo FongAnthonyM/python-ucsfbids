@@ -56,7 +56,7 @@ class Modality(CachingObject, BaseComposite, DispatchableClass):
         kwargs: The keyword arguments for inheritance if any.
     """
 
-    namespace: str | None = "base"
+    register_namespace: str | None = "base"
     register: dict[str, dict[str, type]] = {}
     registration: bool = True
     default_meta_info: dict[str, Any] = {
@@ -254,4 +254,4 @@ class Modality(CachingObject, BaseComposite, DispatchableClass):
         self.create_meta_info()
 
     def create_exporter(self, type_):
-        return self.exporters[type_](session=self)
+        return self.exporters[type_](modality=self)
