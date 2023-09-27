@@ -77,7 +77,7 @@ class Modality(CachingObject, BaseComposite, DispatchableClass):
             name: The name of the subclass.
         """
         super().register_class(namespace=namespace, name=name)
-        cls.default_meta_info.update(ModalityNamespace=cls.namespace, ModalityType=cls.name)
+        cls.default_meta_info.update(ModalityNamespace=cls.register_namespace, ModalityType=cls.register_name)
 
     @classmethod
     def get_class_information(

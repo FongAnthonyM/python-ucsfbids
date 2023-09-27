@@ -57,6 +57,7 @@ class IEEGCDFS(IEEG):
         init: Determines if this object will construct.
         kwargs: The keyword arguments for inheritance.
     """
+    default_meta_info: dict[str, Any] = IEEG.default_meta_info.copy()
     default_exporters: dict[str, type] = {"BIDS": IEEGBIDSExporter}
     cdfs_type: type[CDFS] = CDFS
 

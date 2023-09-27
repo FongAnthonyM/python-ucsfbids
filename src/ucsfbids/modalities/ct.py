@@ -57,6 +57,7 @@ class CT(Modality):
         init: Determines if this object will construct.
         kwargs: The keyword arguments for inheritance.
     """
+    default_meta_info: dict[str, Any] = Modality.default_meta_info.copy()
     default_name: str = "ct"
     default_exporters: dict[str, type] = {"BIDS": CTBIDSExporter}
 

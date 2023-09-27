@@ -78,7 +78,7 @@ class Session(CachingObject, DispatchableClass):
             name: The name of the subclass.
         """
         super().register_class(namespace=namespace, name=name)
-        cls.default_meta_info.update(SessionNamespace=cls.namespace, SessionType=cls.name)
+        cls.default_meta_info.update(SessionNamespace=cls.register_namespace, SessionType=cls.register_name)
 
     @classmethod
     def get_class_information(
