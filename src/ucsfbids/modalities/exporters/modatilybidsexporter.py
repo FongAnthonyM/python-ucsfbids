@@ -70,7 +70,7 @@ class ModalityBIDSExporter(BaseObject):
         super().construct(**kwargs)
 
     def export_all_files(self, path: Path, name: str) -> None:
-        for old_path in self.path.iterdir():
+        for old_path in self.modality.path.iterdir():
             if old_path.is_file():
                 old_name = old_path.name
                 exclude = any(n in old_name for n in self.export_exclude_names)
@@ -80,7 +80,7 @@ class ModalityBIDSExporter(BaseObject):
                         shutil.copy(old_path, new_path)
 
     def export_select_files(self, path: Path, name: str) -> None:
-        for old_path in self.path.iterdir():
+        for old_path in self.modality.path.iterdir():
             if old_path.is_file():
                 old_name = old_path.name
                 include = any(n in old_name for n in self.export_file_names)
