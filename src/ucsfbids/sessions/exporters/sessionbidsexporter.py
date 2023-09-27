@@ -69,7 +69,9 @@ class SessionBIDSExporter(BaseObject):
         for modality in self.session.modalities.values():
             modality.create_exporter("BIDS").export(path, name=name)
 
-    def export(self, path: Path, name: str) -> None:
+    def export(self, path: Path, name: str | None = None) -> None:
+        if name is None:
+            name = self.session.name
         new_path = path / f"ses-{name}"
         new_path.mkdir(exist_ok=True)
         self.export_modalities(path=new_path, name=name)
