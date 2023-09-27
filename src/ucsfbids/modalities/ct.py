@@ -1,4 +1,4 @@
-"""cdfssession.py
+"""ct.py
 A Session which contains a CDFS as part of its structure.
 """
 # Package Header #
@@ -22,14 +22,13 @@ from typing import Any
 from cdfs import CDFS
 
 # Local Packages #
-from .session import Session
-from .exporters import SessionBIDSExporter
-from ..modalities import Modality, Anatomy, CT, IEEGCDFS
+from .modality import Modality
+from .exporters import CTBIDSExporter
 
 
 # Definitions #
 # Classes #
-class CDFSSession(Session):
+class CT(Modality):
     """A Session which contains a CDFS as part of its structure.
 
     Class Attributes:
@@ -58,5 +57,40 @@ class CDFSSession(Session):
         init: Determines if this object will construct.
         kwargs: The keyword arguments for inheritance.
     """
-    default_modalities: dict[str, type[Modality]] = {"anat": Anatomy, "ct": CT, "ieeg": IEEGCDFS}
-    default_exporters: dict[str, type] = {"BIDS": SessionBIDSExporter}
+    default_name: str = "ct"
+    default_exporters: dict[str, type] = {"BIDS": CTBIDSExporter}
+
+    # Magic Methods #
+    # Construction/Destruction
+    def __init__(
+        self,
+        path: Path | str | None = None,
+        name: str | None = None,
+        parent_path: Path | str | None = None,
+        mode: str = 'r',
+        create: bool = False,
+        *,
+        init: bool = True,
+        **kwargs: Any,
+    ) -> None:
+        # New Attributes #
+
+        # Parent Attributes #
+        super().__init__(init=False)
+
+        # Object Construction #
+        if init:
+            self.construct(
+                path=path,
+                name=name,
+                parent_path=parent_path,
+                mode=mode,
+                create=create,
+                **kwargs,
+            )
+
+    # Instance Methods #
+    def create(self) -> None:
+        """Creates and sets up the ct directory."""
+        self.path.mkdir(exist_ok=True)
+        self.create_meta_info()

@@ -20,23 +20,23 @@ from typing import Any
 # Third-Party Packages #
 
 # Local Packages #
-from ..subject import Subject
+from ..session import Session
 
 
 # Definitions #
 # Classes #
-class BIDSSubjectExporter(BaseObject):
+class SessionBIDSExporter(BaseObject):
     # Magic Methods #
     # Construction/Destruction
     def __init__(
         self,
-        subject: Subject | None = None,
+        session: Session | None = None,
         *,
         init: bool = True,
         **kwargs: Any,
     ) -> None:
         # New Attributes #
-        self.subject: Subject | None = None
+        self.session: Session | None = None
 
         # Parent Attributes #
         super().__init__(init=False)
@@ -44,7 +44,7 @@ class BIDSSubjectExporter(BaseObject):
         # Object Construction #
         if init:
             self.construct(
-                subject=subject,
+                session=session,
                 **kwargs,
             )
 
@@ -52,7 +52,7 @@ class BIDSSubjectExporter(BaseObject):
     # Constructors/Destructors
     def construct(
         self,
-        subject: Subject | None = None,
+        session: Session | None = None,
         **kwargs: Any,
     ) -> None:
         """Constructs this object.
@@ -60,20 +60,20 @@ class BIDSSubjectExporter(BaseObject):
         Args:
             kwargs: The keyword arguments for inheritance if any.
         """
-        if subject is not None:
-            self.subject = subject
+        if session is not None:
+            self.session = session
 
         super().construct(**kwargs)
 
-    def export_sessions(self, path: Path, name: str):
-        for session in self.subject.sessions.values():
+    def export_modalities(self, path: Path, name: str):
+        for session in self.subject.modalities.values():
             session.create_exporter("BIDS").export(path, name=name)
 
     def export(self, path: Path, name: str) -> None:
-        new_path = path / f"sub-{name}"
+        new_path = path / f"ses-{name}"
         new_path.mkdir(exist_ok=True)
-        self.export_sessions(path=new_path, name=name)
+        self.export_modalties(path=new_path, name=name)
 
 
 # Assign Exporter
-Subject.default_exporters["BIDS"] = BIDSSubjectExporter
+Session.default_exporters["BIDS"] = SessionBIDSExporter

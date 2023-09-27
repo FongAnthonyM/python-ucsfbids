@@ -13,4 +13,4 @@ __email__ = __email__
 
 # Imports #
 # Local Packages #
-from .subjectbidsexporter import SubjectBIDSExporter
+from .sessionbidsexporter import SessionBIDSExporter

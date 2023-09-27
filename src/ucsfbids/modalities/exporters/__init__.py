@@ -13,4 +13,7 @@ __email__ = __email__
 
 # Imports #
 # Local Packages #
-from .subjectbidsexporter import SubjectBIDSExporter
+from .modatilybidsexporter import ModalityBIDSExporter
+from .anatomybidsexporter import AnatomyBIDSExporter
+from .ctbidsexporter import CTBIDSExporter
+from .ieegbidsexporter import IEEGBIDSExporter

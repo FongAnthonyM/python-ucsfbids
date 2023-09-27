@@ -1,4 +1,4 @@
-"""cdfssession.py
+"""anatomy.py
 A Session which contains a CDFS as part of its structure.
 """
 # Package Header #
@@ -20,16 +20,16 @@ from typing import Any
 
 # Third-Party Packages #
 from cdfs import CDFS
+import pandas as pd
 
 # Local Packages #
-from .session import Session
-from .exporters import SessionBIDSExporter
-from ..modalities import Modality, Anatomy, CT, IEEGCDFS
+from .modality import Modality
+from .exporters import IEEGBIDSExporter
 
 
 # Definitions #
 # Classes #
-class CDFSSession(Session):
+class IEEG(Modality):
     """A Session which contains a CDFS as part of its structure.
 
     Class Attributes:
@@ -58,5 +58,53 @@ class CDFSSession(Session):
         init: Determines if this object will construct.
         kwargs: The keyword arguments for inheritance.
     """
-    default_modalities: dict[str, type[Modality]] = {"anat": Anatomy, "ct": CT, "ieeg": IEEGCDFS}
-    default_exporters: dict[str, type] = {"BIDS": SessionBIDSExporter}
+    default_name: str = "ieeg"
+    default_exporters: dict[str, type] = {"BIDS": IEEGBIDSExporter}
+
+    # Magic Methods #
+    # Construction/Destruction
+    def __init__(
+        self,
+        path: Path | str | None = None,
+        name: str | None = None,
+        parent_path: Path | str | None = None,
+        mode: str = 'r',
+        create: bool = False,
+        *,
+        init: bool = True,
+        **kwargs: Any,
+    ) -> None:
+        # New Attributes #
+
+        # Parent Attributes #
+        super().__init__(init=False)
+
+        # Object Construction #
+        if init:
+            self.construct(
+                path=path,
+                name=name,
+                parent_path=parent_path,
+                mode=mode,
+                create=create,
+                **kwargs,
+            )
+
+    @property
+    def electrodes_path(self) -> Path:
+        """The path to the meta information json file."""
+        return self.ieeg_path / f"{self.full_name}_electrodes.tsv"
+
+    # Instance Methods #
+    def load_electrodes(self) -> pd.DataFrame:
+        """Loads the electrode information from the file.
+
+        Returns:
+            The electrode information.
+        """
+        return pd.read_csv(self.electrodes_path, sep='\t')
+
+    def create(self) -> None:
+        """Creates and sets up the anat directory."""
+        self.path.mkdir(exist_ok=True)
+        self.create_meta_info()

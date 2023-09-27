@@ -1,5 +1,5 @@
-"""session.py
-A base class which defines a Session and dispatches a specific Session subclass based on meta information.
+"""modality.py
+A base class which defines a Modality and dispatches a specific Modality subclass based on meta information.
 """
 # Package Header #
 from ..header import *
@@ -24,13 +24,12 @@ from baseobjects.objects import DispatchableClass
 import pandas as pd
 
 # Local Packages #
-from ..modalities import Modality
 
 
 # Definitions #
 # Classes #
-class Session(CachingObject, DispatchableClass):
-    """A base class which defines a Session and dispatches a specific Session subclass based on meta information.
+class Modality(CachingObject, BaseComposite, DispatchableClass):
+    """A base class which defines a Modality and dispatches a specific Modality subclass based on meta information.
 
     Class Attributes:
         namespace: The namespace of the subclass.
@@ -61,10 +60,10 @@ class Session(CachingObject, DispatchableClass):
     register: dict[str, dict[str, type]] = {}
     registration: bool = True
     default_meta_info: dict[str, Any] = {
-        "SessionNamespace": "",
-        "SessionType": "",
+        "ModalityNamespace": "",
+        "ModalityType": "",
     }
-    default_modalities: dict[str, type[Modality]] = {}
+    default_name: str = ""
     default_exporters: dict[str, type] = {}
 
     # Class Methods #
@@ -78,7 +77,7 @@ class Session(CachingObject, DispatchableClass):
             name: The name of the subclass.
         """
         super().register_class(namespace=namespace, name=name)
-        cls.default_meta_info.update(SessionNamespace=cls.namespace, SessionType=cls.name)
+        cls.default_meta_info.update(ModalityNamespace=cls.namespace, ModalityType=cls.name)
 
     @classmethod
     def get_class_information(
@@ -106,19 +105,20 @@ class Session(CachingObject, DispatchableClass):
                 path = Path(path)
 
             if name is None:
-                name = path.stem[4:]
+                name = path.stem
         elif parent_path is not None and name is not None:
-            path = (parent_path if isinstance(parent_path, Path) else Path(parent_path)) / f"ses-{name}"
+            path = (parent_path if isinstance(parent_path, Path) else Path(parent_path)) / f"{name}"
         else:
             raise ValueError("Either path or (parent_path and name) must be given to disptach class.")
 
-        parent_name = path.parts[-2][4:]
+        subject_name = path.parts[-3][4:]
+        session_name = path.parts[-2][4:]
 
-        meta_info_path = path / f"sub-{parent_name}_ses-{name}_meta.json"
+        meta_info_path = path / f"sub-{subject_name}_ses-{session_name}_{name}-meta.json"
         with meta_info_path.open("r") as file:
             info = json.load(file)
 
-        return info["SessionNamespace"], info["SessionType"]
+        return info["ModalityNamespace"], info["ModalityType"]
 
     # Magic Methods #
     # Construction/Destruction
@@ -129,7 +129,6 @@ class Session(CachingObject, DispatchableClass):
         parent_path: Path | str | None = None,
         mode: str = 'r',
         create: bool = False,
-        load: bool = True,
         *,
         init: bool = True,
         **kwargs: Any,
@@ -139,11 +138,11 @@ class Session(CachingObject, DispatchableClass):
         self._is_open: bool = False
         self._mode: str = "r"
 
-        self.name: str | None = None
-        self.parent_name: str | None = None
-
         self.meta_info: dict = self.default_meta_info.copy()
-        self.modalities: dict[str, Modality] = {}
+
+        self.name: str = self.default_name
+        self.subject_name: str | None = None
+        self.session_name: str | None = None
 
         self.exporters: dict[str, type] = self.default_exporters.copy()
 
@@ -158,7 +157,6 @@ class Session(CachingObject, DispatchableClass):
                 parent_path=parent_path,
                 mode=mode,
                 create=create,
-                load=load,
                 **kwargs,
             )
 
@@ -177,12 +175,12 @@ class Session(CachingObject, DispatchableClass):
     @property
     def full_name(self) -> str:
         """The fill name of this session, including subject."""
-        return f"sub-{self.parent_name}_ses-{self.name}"
+        return f"sub-{self.subject_name}_ses-{self.session_name}"
 
     @property
     def meta_info_path(self) -> Path:
         """The path to the meta information json file."""
-        return self._path / f"{self.full_name}_meta.json"
+        return self._path / f"{self.full_name}_{self.name}-meta.json"
 
     # Instance Methods #
     # Constructors/Destructors
@@ -193,7 +191,6 @@ class Session(CachingObject, DispatchableClass):
         parent_path: Path | str | None = None,
         mode: str | None = None,
         create: bool = False,
-        load: bool = False,
         **kwargs: Any,
     ) -> None:
         """Constructs this object.
@@ -214,21 +211,19 @@ class Session(CachingObject, DispatchableClass):
 
         if self.path is not None:
             if name is None:
-                self.name = self.path.stem[4:]
+                self.name = self.path.stem
         elif parent_path is not None and self.name is not None:
-            self.path = (parent_path if isinstance(parent_path, Path) else Path(parent_path)) / f"ses-{self.name}"
+            self.path = (parent_path if isinstance(parent_path, Path) else Path(parent_path)) / f"{self.name}"
 
         if self.path is not None:
-            self.parent_name = self.path.parts[-2][4:]
+            self.subject_name = self.path.parts[-3][4:]
+            self.session_name = self.path.parts[-2][4:]
             
         if mode is not None:
             self._mode = mode
 
-        if self.path is not None:
-            if load and self.path.exists():
-                self.load_modalities()
-            elif create:
-                self.create()
+        if create:
+            self.create()
 
         super().construct(**kwargs)
 
@@ -241,7 +236,7 @@ class Session(CachingObject, DispatchableClass):
         """Loads the meta information from the file.
 
         Returns:
-            The session meta information.
+            The modality meta information.
         """
         self.meta_info.clear()
         with self.meta_info_path.open("r") as file:
@@ -253,23 +248,10 @@ class Session(CachingObject, DispatchableClass):
         with self.meta_info_path.open(self._mode) as file:
             json.dump(self.meta_info, file)
 
-    def load_modalities(self, mode: str | None = None) -> None:
-        """Loads all modalities in this session."""
-        mode = self._mode if mode is None else mode
-        self.modalities.clear()
-        self.modalities.update(
-            {m.name: m for p in self.path.iterdir() if p.is_dir() and (m := Modality(path=p, mode=mode)) is not None},
-        )
-
-    def create_modalities(self) -> None:
-        for name, modality_type in self.default_modalities.items():
-            self.modalities[name] = modality_type(parent_path=self.path, mode=self._mode, create=True)
-
     def create(self) -> None:
-        """Creates all contents of the session."""
+        """Creates all contents of the modality."""
         self.path.mkdir(exist_ok=True)
         self.create_meta_info()
-        self.create_modalities()
 
     def create_exporter(self, type_):
         return self.exporters[type_](session=self)

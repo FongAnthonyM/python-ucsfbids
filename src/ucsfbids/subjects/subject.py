@@ -55,6 +55,7 @@ class Subject(BaseComposite):
         name: str | None = None,
         parent_path: Path | str | None = None,
         mode: str = 'r',
+        create: bool = False,
         load: bool = True,
         *,
         init: bool = True,
@@ -80,6 +81,7 @@ class Subject(BaseComposite):
                 name=name,
                 parent_path=parent_path,
                 mode=mode,
+                create=create,
                 load=load,
                 **kwargs,
             )
@@ -146,13 +148,14 @@ class Subject(BaseComposite):
         """Creates and sets up the subject's directory."""
         self.path.mkdir(exist_ok=True)
 
-    def load_sessions(self, mode: str | None = None) -> None:
+    def load_sessions(self, mode: str | None = None, load: bool = True) -> None:
         """Loads all sessions in this subject."""
         m = self._mode if mode is None else mode
         self.sessions.clear()
-        self.sessions.update(
-            {s.name: s for p in self.path.iterdir() if p.is_dir() and (s := Session(path=p, mode=m)) is not None},
-        )
+        self.sessions.update({
+            s.name: s
+            for p in self.path.iterdir() if p.is_dir() and (s := Session(path=p, mode=m, load=load)) is not None
+        },)
 
     def create_exporter(self, type_: str) -> Any:
         return self.exporters[type_](subject=self)
