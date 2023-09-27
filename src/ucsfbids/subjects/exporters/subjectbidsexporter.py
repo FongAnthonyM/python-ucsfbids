@@ -65,9 +65,9 @@ class SubjectBIDSExporter(BaseObject):
 
         super().construct(**kwargs)
 
-    def export_sessions(self, path: Path, name: str):
+    def export_sessions(self, path: Path):
         for session in self.subject.sessions.values():
-            session.create_exporter("BIDS").export(path, name=name)
+            session.create_exporter("BIDS").export(path)
 
     def export(self, path: Path, name: str) -> None:
         new_path = path / f"sub-{name}"
