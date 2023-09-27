@@ -94,7 +94,7 @@ class IEEG(Modality):
     @property
     def electrodes_path(self) -> Path:
         """The path to the meta information json file."""
-        return self.ieeg_path / f"{self.full_name}_electrodes.tsv"
+        return self.path / f"{self.full_name}_electrodes.tsv"
 
     # Instance Methods #
     def load_electrodes(self) -> pd.DataFrame:
