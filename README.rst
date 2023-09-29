@@ -84,6 +84,9 @@ Issues
 If you encounter any problems,
 please `file an issue`_ along with a detailed description.
 
+Authors
+-------
+Anthony Fong
 
 Credits
 -------
