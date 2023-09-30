@@ -64,6 +64,7 @@ class Session(CachingObject, DispatchableClass):
         "SessionType": "",
     }
     default_modalities: dict[str, type[Modality]] = {}
+    default_importers: dict[str, type] = {}
     default_exporters: dict[str, type] = {}
 
     # Class Methods #
@@ -144,6 +145,7 @@ class Session(CachingObject, DispatchableClass):
         self.meta_info: dict = self.default_meta_info.copy()
         self.modalities: dict[str, Modality] = {}
 
+        self.importers: dict[str, type] = self.default_importers.copy()
         self.exporters: dict[str, type] = self.default_exporters.copy()
 
         # Parent Attributes #
@@ -223,6 +225,9 @@ class Session(CachingObject, DispatchableClass):
         if mode is not None:
             self._mode = mode
 
+        if not load:
+            self.build_default_modalities()
+
         if self.path is not None:
             if load and self.path.exists():
                 self.load_modalities()
@@ -252,6 +257,20 @@ class Session(CachingObject, DispatchableClass):
         with self.meta_info_path.open(self._mode) as file:
             json.dump(self.meta_info, file)
 
+    def build_default_modalities(self) -> None:
+        for name, modality_type in self.default_modalities.items():
+            self.modalities = modality_type(parent_path=self.path, mode=self._mode)
+
+    def create_modalities(self) -> None:
+        for name, modality in self.modalities.items():
+            modality.create()
+
+    def create(self) -> None:
+        """Creates all contents of the session."""
+        self.path.mkdir(exist_ok=True)
+        self.create_meta_info()
+        self.create_modalities()
+
     def load_modalities(self, mode: str | None = None) -> None:
         """Loads all modalities in this session."""
         mode = self._mode if mode is None else mode
@@ -260,15 +279,8 @@ class Session(CachingObject, DispatchableClass):
             {m.name: m for p in self.path.iterdir() if p.is_dir() and (m := Modality(path=p, mode=mode)) is not None},
         )
 
-    def create_modalities(self) -> None:
-        for name, modality_type in self.default_modalities.items():
-            self.modalities[name] = modality_type(parent_path=self.path, mode=self._mode, create=True)
-
-    def create(self) -> None:
-        """Creates all contents of the session."""
-        self.path.mkdir(exist_ok=True)
-        self.create_meta_info()
-        self.create_modalities()
+    def create_importer(self, type_):
+        return self.importers[type_](session=self)
 
     def create_exporter(self, type_):
         return self.exporters[type_](session=self)

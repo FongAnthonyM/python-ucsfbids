@@ -45,6 +45,7 @@ class Subject(BaseComposite):
         init: Determines if this object will construct.
         kwargs: The keyword arguments for inheritance if any.
     """
+    default_importers: dict[str, type] = {}
     default_exporters: dict[str, type] = {}
 
     # Magic Methods #
@@ -69,6 +70,7 @@ class Subject(BaseComposite):
 
         self.sessions: dict[str, Session] = {}
 
+        self.importers: dict[str, type] = self.default_importers.copy()
         self.exporters: dict[str, type] = self.default_exporters.copy()
 
         # Parent Attributes #
@@ -157,9 +159,6 @@ class Subject(BaseComposite):
             for p in self.path.iterdir() if p.is_dir() and (s := Session(path=p, mode=m, load=load)) is not None
         },)
 
-    def create_exporter(self, type_: str) -> Any:
-        return self.exporters[type_](subject=self)
-
     def generate_latest_session_name(self) -> str:
         """Generates a session name for a new latest session.
 
@@ -203,3 +202,8 @@ class Subject(BaseComposite):
         )
         return new_session
 
+    def create_importer(self, type_):
+        return self.importers[type_](session=self)
+
+    def create_exporter(self, type_: str) -> Any:
+        return self.exporters[type_](subject=self)

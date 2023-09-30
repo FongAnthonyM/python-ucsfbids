@@ -63,6 +63,7 @@ class Modality(CachingObject, BaseComposite, DispatchableClass):
         "ModalityType": "",
     }
     default_name: str = ""
+    default_importers: dict[str, type] = {}
     default_exporters: dict[str, type] = {}
 
     # Class Methods #
@@ -143,6 +144,7 @@ class Modality(CachingObject, BaseComposite, DispatchableClass):
         self.subject_name: str | None = None
         self.session_name: str | None = None
 
+        self.importers: dict[str, type] = self.default_importers.copy()
         self.exporters: dict[str, type] = self.default_exporters.copy()
 
         # Parent Attributes #
@@ -252,5 +254,9 @@ class Modality(CachingObject, BaseComposite, DispatchableClass):
         self.path.mkdir(exist_ok=True)
         self.create_meta_info()
 
-    def create_exporter(self, type_):
-        return self.exporters[type_](modality=self)
+    def create_importer(self, type_):
+        return self.importers[type_](session=self)
+
+    def create_exporter(self, type_: str) -> Any:
+        return self.exporters[type_](subject=self)
+
