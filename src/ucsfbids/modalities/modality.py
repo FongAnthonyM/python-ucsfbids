@@ -127,7 +127,7 @@ class Modality(CachingObject, BaseComposite, DispatchableClass):
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
-        mode: str = 'r',
+        mode: str = "r",
         create: bool = False,
         *,
         init: bool = True,
@@ -219,7 +219,7 @@ class Modality(CachingObject, BaseComposite, DispatchableClass):
         if self.path is not None:
             self.subject_name = self.path.parts[-3][4:]
             self.session_name = self.path.parts[-2][4:]
-            
+
         if mode is not None:
             self._mode = mode
 
@@ -259,4 +259,3 @@ class Modality(CachingObject, BaseComposite, DispatchableClass):
 
     def create_exporter(self, type_: str) -> Any:
         return self.exporters[type_](subject=self)
-

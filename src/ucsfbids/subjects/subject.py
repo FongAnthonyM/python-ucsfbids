@@ -45,6 +45,7 @@ class Subject(BaseComposite):
         init: Determines if this object will construct.
         kwargs: The keyword arguments for inheritance if any.
     """
+
     default_importers: dict[str, type] = {}
     default_exporters: dict[str, type] = {}
 
@@ -55,7 +56,7 @@ class Subject(BaseComposite):
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
-        mode: str = 'r',
+        mode: str = "r",
         create: bool = False,
         load: bool = True,
         *,
@@ -154,10 +155,13 @@ class Subject(BaseComposite):
         """Loads all sessions in this subject."""
         m = self._mode if mode is None else mode
         self.sessions.clear()
-        self.sessions.update({
-            s.name: s
-            for p in self.path.iterdir() if p.is_dir() and (s := Session(path=p, mode=m, load=load)) is not None
-        },)
+        self.sessions.update(
+            {
+                s.name: s
+                for p in self.path.iterdir()
+                if p.is_dir() and (s := Session(path=p, mode=m, load=load)) is not None
+            },
+        )
 
     def generate_latest_session_name(self) -> str:
         """Generates a session name for a new latest session.

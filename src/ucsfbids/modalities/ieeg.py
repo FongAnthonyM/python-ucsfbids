@@ -58,6 +58,7 @@ class IEEG(Modality):
         init: Determines if this object will construct.
         kwargs: The keyword arguments for inheritance.
     """
+
     default_meta_info: dict[str, Any] = Modality.default_meta_info.copy()
     default_name: str = "ieeg"
     default_exporters: dict[str, type] = {"BIDS": IEEGBIDSExporter}
@@ -69,7 +70,7 @@ class IEEG(Modality):
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
-        mode: str = 'r',
+        mode: str = "r",
         create: bool = False,
         *,
         init: bool = True,
@@ -103,7 +104,7 @@ class IEEG(Modality):
         Returns:
             The electrode information.
         """
-        return pd.read_csv(self.electrodes_path, sep='\t')
+        return pd.read_csv(self.electrodes_path, sep="\t")
 
     def create(self) -> None:
         """Creates and sets up the anat directory."""

@@ -57,6 +57,7 @@ class Anatomy(Modality):
         init: Determines if this object will construct.
         kwargs: The keyword arguments for inheritance.
     """
+
     default_meta_info: dict[str, Any] = Modality.default_meta_info.copy()
     default_name: str = "anat"
     default_exporters: dict[str, type] = {"BIDS": AnatomyBIDSExporter}
@@ -68,7 +69,7 @@ class Anatomy(Modality):
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
-        mode: str = 'r',
+        mode: str = "r",
         create: bool = False,
         *,
         init: bool = True,

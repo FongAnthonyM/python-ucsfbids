@@ -127,7 +127,7 @@ class Session(CachingObject, DispatchableClass):
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
-        mode: str = 'r',
+        mode: str = "r",
         create: bool = False,
         load: bool = True,
         *,
@@ -221,7 +221,7 @@ class Session(CachingObject, DispatchableClass):
 
         if self.path is not None:
             self.parent_name = self.path.parts[-2][4:]
-            
+
         if mode is not None:
             self._mode = mode
 
