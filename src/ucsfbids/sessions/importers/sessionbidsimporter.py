@@ -1,0 +1,83 @@
+"""subject.py
+
+"""
+# Package Header #
+from ucsfbids.header import *
+
+# Header #
+__author__ = __author__
+__credits__ = __credits__
+__maintainer__ = __maintainer__
+__email__ = __email__
+
+
+# Imports #
+# Standard Libraries #
+from baseobjects import BaseObject
+from pathlib import Path
+from typing import Any
+
+# Third-Party Packages #
+
+# Local Packages #
+from ..session import Session
+
+
+# Definitions #
+# Classes #
+class SessionBIDSImporter(BaseObject):
+    # Magic Methods #
+    # Construction/Destruction
+    def __init__(
+        self,
+        session: Session | None = None,
+        *,
+        init: bool = True,
+        **kwargs: Any,
+    ) -> None:
+        # New Attributes #
+        self.session: Session | None = None
+
+        # Parent Attributes #
+        super().__init__(init=False)
+
+        # Object Construction #
+        if init:
+            self.construct(
+                session=session,
+                **kwargs,
+            )
+
+    # Instance Methods #
+    # Constructors/Destructors
+    def construct(
+        self,
+        session: Session | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """Constructs this object.
+
+        Args:
+            kwargs: The keyword arguments for inheritance if any.
+        """
+        if session is not None:
+            self.session = session
+
+        super().construct(**kwargs)
+
+    def import_modalities(self, path: Path, name: str):
+        for modality in self.session.modalities.values():
+            modality.create_importer("BIDS").execute_import(path, name=name)
+
+    def execute_import(self, path: Path, name: str | None = None) -> None:
+        if name is None:
+            name = self.session.name
+
+        full_name = f"{path.parts[-1]}_ses-{name}"
+        new_path = path / f"ses-{name}"
+        new_path.mkdir(exist_ok=True)
+        self.import_modalities(path=new_path, name=full_name)
+
+
+# Assign Exporter
+Session.default_importers["BIDS"] = SessionBIDSImporter
