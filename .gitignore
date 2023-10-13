@@ -75,3 +75,4 @@ docs/_build
 
 # Mypy Cache
 .mypy_cache/
+pyrightconfig.json
