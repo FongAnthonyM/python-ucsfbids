@@ -24,6 +24,7 @@ from cdfs import CDFS
 # Local Packages #
 from .modality import Modality
 from .exporters import CTBIDSExporter
+from .importers import CTBIDSImporter
 
 
 # Definitions #
@@ -61,6 +62,7 @@ class CT(Modality):
     default_meta_info: dict[str, Any] = Modality.default_meta_info.copy()
     default_name: str = "ct"
     default_exporters: dict[str, type] = {"BIDS": CTBIDSExporter}
+    default_importers: dict[str, type] = {"BIDS": CTBIDSImporter}
 
     # Magic Methods #
     # Construction/Destruction

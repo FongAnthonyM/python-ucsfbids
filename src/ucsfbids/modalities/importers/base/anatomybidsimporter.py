@@ -20,10 +20,10 @@ from typing import Any
 # Third-Party Packages #
 
 # Local Packages #
-from .modalitybidsexporter import ModalityBIDSExporter
+from ..modalitybidsimporter import ModalityBIDSImporter
 
 
 # Definitions #
 # Classes #
-class AnatomyBIDSExporter(ModalityBIDSExporter):
+class AnatomyBIDSImporter(ModalityBIDSImporter):
     pass

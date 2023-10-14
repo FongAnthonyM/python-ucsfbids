@@ -24,6 +24,7 @@ from cdfs import CDFS
 # Local Packages #
 from .modality import Modality
 from .exporters import AnatomyBIDSExporter
+from .importers import AnatomyBIDSImporter
 
 
 # Definitions #
@@ -61,6 +62,7 @@ class Anatomy(Modality):
     default_meta_info: dict[str, Any] = Modality.default_meta_info.copy()
     default_name: str = "anat"
     default_exporters: dict[str, type] = {"BIDS": AnatomyBIDSExporter}
+    default_importers: dict[str, type] = {"BIDS": AnatomyBIDSImporter}
 
     # Magic Methods #
     # Construction/Destruction

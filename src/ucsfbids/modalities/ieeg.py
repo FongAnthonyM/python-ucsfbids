@@ -25,6 +25,7 @@ import pandas as pd
 # Local Packages #
 from .modality import Modality
 from .exporters import IEEGBIDSExporter
+from .importers import IEEGBIDSImporter
 
 
 # Definitions #
@@ -62,6 +63,7 @@ class IEEG(Modality):
     default_meta_info: dict[str, Any] = Modality.default_meta_info.copy()
     default_name: str = "ieeg"
     default_exporters: dict[str, type] = {"BIDS": IEEGBIDSExporter}
+    default_importers: dict[str, type] = {"BIDS": IEEGBIDSImporter}
 
     # Magic Methods #
     # Construction/Destruction

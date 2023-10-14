@@ -2,7 +2,7 @@
 
 """
 # Package Header #
-from ...header import *
+from ucsfbids.header import *
 
 # Header #
 __author__ = __author__
@@ -13,7 +13,6 @@ __email__ = __email__
 
 # Imports #
 # Local Packages #
-from .modalitybidsimporter import ModalityBIDSImporter
-from .base import AnatomyBIDSImporter
-from .base import CTBIDSImporter 
-from .base import IEEGBIDSImporter 
+from .anatomybidsimporter import AnatomyBIDSImporter
+from .ctbidsimporter import CTBIDSImporter 
+from .ieegbidsimporter import IEEGBIDSImporter 
