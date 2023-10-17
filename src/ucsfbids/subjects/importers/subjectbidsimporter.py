@@ -2,7 +2,7 @@
 
 """
 # Package Header #
-from ucsfbids.header import *
+from ucsfbids.header import __author__, __credits__, __maintainer__, __email__
 
 # Header #
 __author__ = __author__
@@ -31,12 +31,14 @@ class SubjectBIDSImporter(BaseObject):
     def __init__(
         self,
         subject: Subject | None = None,
+        src_root: Path | None = None,
         *,
         init: bool = True,
         **kwargs: Any,
     ) -> None:
         # New Attributes #
         self.subject: Subject | None = None
+        self.src_roott: Path | None = None
 
         # Parent Attributes #
         super().__init__(init=False)
@@ -45,6 +47,7 @@ class SubjectBIDSImporter(BaseObject):
         if init:
             self.construct(
                 subject=subject,
+                src_root=src_root,
                 **kwargs,
             )
 
@@ -53,6 +56,7 @@ class SubjectBIDSImporter(BaseObject):
     def construct(
         self,
         subject: Subject | None = None,
+        src_root: Path | None = None,
         **kwargs: Any,
     ) -> None:
         """Constructs this object.
@@ -63,11 +67,16 @@ class SubjectBIDSImporter(BaseObject):
         if subject is not None:
             self.subject = subject
 
+        if src_root is not None:
+            self.src_root = src_root
+
         super().construct(**kwargs)
 
     def import_sessions(self, path: Path):
+        if self.subject is None:
+            raise RuntimeError("Undefined Subject")
         for session in self.subject.sessions.values():
-            session.create_importer("BIDS").execute_import(path)
+            session.create_importer("BIDS", self.src_root).execute_import(path)
 
     def execute_import(self, path: Path, name: str) -> None:
         new_path = path / f"sub-{name}"

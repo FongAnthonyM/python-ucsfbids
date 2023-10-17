@@ -254,8 +254,8 @@ class Modality(CachingObject, BaseComposite, DispatchableClass):
         self.path.mkdir(exist_ok=True)
         self.create_meta_info()
 
-    def create_importer(self, type_: str) -> Any:
-        return self.importers[type_](modality=self)
+    def create_importer(self, type_: str, src_root: Path | None) -> Any:
+        return self.importers[type_](modality=self, src_root=src_root)
 
     def create_exporter(self, type_: str) -> Any:
         return self.exporters[type_](modality=self)
