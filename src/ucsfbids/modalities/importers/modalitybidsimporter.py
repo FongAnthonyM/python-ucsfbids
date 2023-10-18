@@ -2,7 +2,7 @@
 
 """
 # Package Header #
-from ucsfbids.header import __author__, __credits__, __maintainer__, __email__
+from ucsfbids.header import __author__, __credits__, __email__, __maintainer__
 
 # Header #
 __author__ = __author__
@@ -11,17 +11,21 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
+import os
+import shutil
+import subprocess
+from pathlib import Path
+from typing import Any, List
+
 # Imports #
 # Standard Libraries #
 from baseobjects import BaseObject
-from pathlib import Path
-import shutil
-from typing import Any, Mapping
-
-# Third-Party Packages #
 
 # Local Packages #
 from ..modality import Modality
+from .importspec import ImportSpec
+
+# Third-Party Packages #
 
 
 # Definitions #
@@ -36,7 +40,7 @@ class ModalityBIDSImporter(BaseObject):
         self,
         modality: Modality | None = None,
         src_root: Path | None = None,
-        src: Mapping[str, Path] = {},
+        specs: List[ImportSpec] = [],
         *,
         init: bool = True,
         **kwargs: Any,
@@ -44,7 +48,7 @@ class ModalityBIDSImporter(BaseObject):
         # New Attributes #
         self.modality: Modality | None = None
         self.src_root: Path | None = None
-        self.src: Mapping[str, Path] = {}
+        self.specs: List[ImportSpec] = []
 
         # Parent Attributes #
         super().__init__(init=False)
@@ -53,8 +57,8 @@ class ModalityBIDSImporter(BaseObject):
         if init:
             self.construct(
                 modality=modality,
-                src_root = src_root,
-                src = src,
+                src_root=src_root,
+                specs=specs,
                 **kwargs,
             )
 
@@ -64,7 +68,7 @@ class ModalityBIDSImporter(BaseObject):
         self,
         modality: Modality | None = None,
         src_root: Path | None = None,
-        src: Mapping[str, Path] = {},
+        specs: List[ImportSpec] = [],
         **kwargs: Any,
     ) -> None:
         """Constructs this object.
@@ -78,37 +82,63 @@ class ModalityBIDSImporter(BaseObject):
         if src_root:
             self.src_root = src_root
 
-        if src:
-            self.src = src
+        if specs:
+            self.specs = specs
 
         super().construct(**kwargs)
 
     def import_all_files(self, path: Path) -> None:
         if self.modality is None:
             raise RuntimeError("Undefined Modality")
-        for bids_suffix, old_path in self.src.items():
+        for importspec in self.specs:
+            subject_name = self.modality.subject_name
+            if subject_name is None:
+                raise RuntimeError("subject name undefined")
+            if self.src_root is None:
+                raise RuntimeError("Import root undefined")
+            old_path = self.src_root / subject_name / importspec.path_from_root
             if old_path.is_file():
                 old_name = old_path.name
                 exclude = any(n in old_name for n in self.import_exclude_names)
                 if not exclude:
-                    file_suffix = "".join(old_path.suffixes)
-                    new_path = path / f"{self.modality.full_name}_{bids_suffix}{file_suffix}"
+                    new_path = path / f"{self.modality.full_name}_{importspec.suffix}{importspec.extension}"
                     if not new_path.exists():
-                        shutil.copy(old_path, new_path)
+                        if importspec.copy_command is not None:
+                            if isinstance(importspec.copy_command, str):
+                                subprocess.run(f"{importspec.copy_command} {old_path} {new_path}")
+                            elif callable(importspec.copy_command):
+                                importspec.copy_command(old_path, new_path)
+                        else:
+                            shutil.copy(old_path, new_path)
+                        if importspec.post_command is not None:
+                            subprocess.run(f"{importspec.post_command} {new_path}")
 
     def import_select_files(self, path: Path) -> None:
         if self.modality is None:
             raise RuntimeError("Undefined Modality")
-        for bids_suffix, old_path in self.src.items():
+        for importspec in self.specs:
+            subject_name = self.modality.subject_name
+            if subject_name is None:
+                raise RuntimeError("subject name undefined")
+            if self.src_root is None:
+                raise RuntimeError("Import root undefined")
+            old_path = self.src_root / subject_name / importspec.path_from_root
             if old_path.is_file():
                 old_name = old_path.name
                 include = any(n in old_name for n in self.import_file_names)
                 exclude = any(n in old_name for n in self.import_exclude_names)
                 if include and not exclude:
-                    file_suffix = "".join(old_path.suffixes)
-                    new_path = path / f"{self.modality.full_name}_{bids_suffix}{file_suffix}"
+                    new_path = path / f"{self.modality.full_name}_{importspec.suffix}{importspec.extension}"
                     if not new_path.exists():
-                        shutil.copy(old_path, new_path)
+                        if importspec.copy_command is not None:
+                            if isinstance(importspec.copy_command, str):
+                                subprocess.run(f"{importspec.copy_command} {old_path} {new_path}")
+                            elif callable(importspec.copy_command):
+                                importspec.copy_command(old_path, new_path)
+                        else:
+                            shutil.copy(old_path, new_path)
+                        if importspec.post_command is not None:
+                            subprocess.run(f"{importspec.post_command} {new_path}")
 
     def execute_import(self, path: Path) -> None:
         if self.modality is None:

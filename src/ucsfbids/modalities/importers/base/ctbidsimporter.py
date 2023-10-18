@@ -2,7 +2,7 @@
 
 """
 # Package Header #
-from ucsfbids.header import *
+from ucsfbids.header import __author__, __credits__, __email__, __maintainer__
 
 # Header #
 __author__ = __author__
@@ -11,19 +11,24 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
-# Imports #
-# Standard Libraries #
-from baseobjects import BaseObject
 from pathlib import Path
 from typing import Any
 
-# Third-Party Packages #
+# Imports #
+# Standard Libraries #
+from baseobjects import BaseObject
 
+from ...ct import CT
 # Local Packages #
 from ..modalitybidsimporter import ModalityBIDSImporter
+
+# Third-Party Packages #
+
 
 
 # Definitions #
 # Classes #
 class CTBIDSImporter(ModalityBIDSImporter):
     pass
+
+CT.default_importers["BIDS"] = CTBIDSImporter

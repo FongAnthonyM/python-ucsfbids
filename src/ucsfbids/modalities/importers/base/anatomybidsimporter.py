@@ -11,19 +11,25 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
-# Imports #
-# Standard Libraries #
-from baseobjects import BaseObject
 from pathlib import Path
 from typing import Any
 
-# Third-Party Packages #
+# Imports #
+# Standard Libraries #
+from baseobjects import BaseObject
+
+from ...anatomy import Anatomy
 
 # Local Packages #
 from ..modalitybidsimporter import ModalityBIDSImporter
+
+# Third-Party Packages #
 
 
 # Definitions #
 # Classes #
 class AnatomyBIDSImporter(ModalityBIDSImporter):
     pass
+
+
+Anatomy.default_importers["BIDS"] = AnatomyBIDSImporter
