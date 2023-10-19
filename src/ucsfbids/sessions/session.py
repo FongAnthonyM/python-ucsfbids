@@ -19,8 +19,8 @@ from typing import Any
 
 # Third-Party Packages #
 from baseobjects import BaseComposite
-from baseobjects.cachingtools import CachingObject, timed_keyless_cache
-from baseobjects.objects import DispatchableClass
+from baseobjects.cachingtools.cachingobject import CachingObject, timed_keyless_cache
+from baseobjects.objects.dispatchableclass import DispatchableClass
 import pandas as pd
 
 # Local Packages #
@@ -63,7 +63,7 @@ class Session(CachingObject, DispatchableClass):
         "SessionNamespace": "",
         "SessionType": "",
     }
-    default_modalities: dict[str, type[Modality]] = {}
+    default_modalities: dict[str, type] = {}
     default_importers: dict[str, type] = {}
     default_exporters: dict[str, type] = {}
 
@@ -102,19 +102,19 @@ class Session(CachingObject, DispatchableClass):
             The namespace and name of the class.
         """
         if path is not None:
-            if not isinstance(parent_path, Path):
+            if not isinstance(parent_path, Path):  # TODO: inconsistent
                 path = Path(path)
 
             if name is None:
-                name = path.stem[4:]
+                name = path.stem[4:]  # FIX: why do we modify a None path
         elif parent_path is not None and name is not None:
             path = (parent_path if isinstance(parent_path, Path) else Path(parent_path)) / f"ses-{name}"
         else:
             raise ValueError("Either path or (parent_path and name) must be given to disptach class.")
 
-        parent_name = path.parts[-2][4:]
+        parent_name = path.parts[-2][4:]  # FIX: path is a string apparently
 
-        meta_info_path = path / f"sub-{parent_name}_ses-{name}_meta.json"
+        meta_info_path = path / f"sub-{parent_name}_ses-{name}_meta.json"  # FIX: parent_name is a string
         with meta_info_path.open("r") as file:
             info = json.load(file)
 
@@ -166,7 +166,7 @@ class Session(CachingObject, DispatchableClass):
     @property
     def path(self) -> Path:
         """The path to the session."""
-        return self._path
+        return self._path  # FIX: path can be none
 
     @path.setter
     def path(self, value: str | Path) -> None:
@@ -183,7 +183,7 @@ class Session(CachingObject, DispatchableClass):
     @property
     def meta_info_path(self) -> Path:
         """The path to the meta information json file."""
-        return self._path / f"{self.full_name}_meta.json"
+        return self._path / f"{self.full_name}_meta.json"  # FIX: path can be none
 
     # Instance Methods #
     # Constructors/Destructors
@@ -259,7 +259,7 @@ class Session(CachingObject, DispatchableClass):
 
     def build_default_modalities(self) -> None:
         for name, modality_type in self.default_modalities.items():
-            self.modalities = modality_type(parent_path=self.path, mode=self._mode)
+            self.modalities[name] = modality_type(parent_path=self.path, mode=self._mode)
 
     def create_modalities(self) -> None:
         for name, modality in self.modalities.items():
