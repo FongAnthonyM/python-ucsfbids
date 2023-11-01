@@ -259,7 +259,7 @@ class Session(CachingObject, DispatchableClass):
 
     def build_default_modalities(self) -> None:
         for name, modality_type in self.default_modalities.items():
-            self.modalities = modality_type(parent_path=self.path, mode=self._mode)
+            self.modalities[name] = modality_type(parent_path=self.path, mode=self._mode)
 
     def create_modalities(self) -> None:
         for name, modality in self.modalities.items():
