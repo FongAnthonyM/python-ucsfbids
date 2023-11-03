@@ -12,18 +12,16 @@ __email__ = __email__
 
 
 from pathlib import Path
-from typing import Any, List
-
-from baseobjects import BaseObject
+from typing import Any, Optional
 
 from ...anatomy import Anatomy
-from ..base import AnatomyBIDSImporter
+from ..base import AnatomyImporter
 from ..importspec import ImportSpec
 
 
 # Definitions #
 # Classes #
-class AnatomyPiaImporter(AnatomyBIDSImporter):
+class AnatomyPiaImporter(AnatomyImporter):
     anat_pia_spec = [
         ImportSpec("T1w", ".nii.gz", Path("mri/brain.mgz"), copy_command="mri_convert"),
         ImportSpec("T1w", ".json", Path("acpc/T1_orig.json")),
@@ -37,8 +35,17 @@ class AnatomyPiaImporter(AnatomyBIDSImporter):
         init: bool = True,
         **kwargs: Any,
     ) -> None:
-        spec: List[ImportSpec] = self.anat_pia_spec
-        super().__init__(modality=modality, src_root=src_root, spec=spec, init=init, **kwargs)
+        self.modality: Optional[Anatomy] = None
+        self.src_root: Optional[Path] = None
+        super().__init__(init=False)
+
+        if init:
+            self.construct(
+                modality=modality,
+                src_root=src_root,
+                specs=self.anat_pia_spec,
+                **kwargs,
+            )
 
 
 Anatomy.default_importers["Pia"] = AnatomyPiaImporter

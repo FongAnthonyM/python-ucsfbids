@@ -18,11 +18,13 @@ from typing import Any
 # Standard Libraries #
 from baseobjects import BaseComposite
 from baseobjects.cachingtools import CachingObject, timed_keyless_cache
+
 # Third-Party Packages #
 from cdfs import CDFS
 
 from .exporters import AnatomyBIDSExporter
-from .importers import AnatomyBIDSImporter
+from .importers import AnatomyImporter
+
 # Local Packages #
 from .modality import Modality
 
@@ -62,7 +64,7 @@ class Anatomy(Modality):
     default_meta_info: dict[str, Any] = Modality.default_meta_info.copy()
     default_name: str = "anat"
     default_exporters: dict[str, type] = {"BIDS": AnatomyBIDSExporter}
-    default_importers: dict[str, type] = {"BIDS": AnatomyBIDSImporter}
+    default_importers: dict[str, type] = {"BIDS": AnatomyImporter}
 
     # Magic Methods #
     # Construction/Destruction

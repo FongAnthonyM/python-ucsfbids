@@ -14,5 +14,5 @@ __email__ = __email__
 # Imports #
 # Local Packages #
 from .anatomypiaimporter import AnatomyPiaImporter
-from .ctpiaimporter import CTPiaImporter 
-from .ieegpiaimporter import IEEGPiaImporter 
+from .ctpiaimporter import CTPiaImporter
+from .ieegpiaimporter import IEEGPiaImporter

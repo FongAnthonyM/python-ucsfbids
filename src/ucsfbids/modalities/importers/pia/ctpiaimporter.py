@@ -12,7 +12,7 @@ __email__ = __email__
 
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 # Imports #
 # Standard Libraries #
@@ -21,7 +21,7 @@ from baseobjects import BaseObject
 from ...ct import CT
 
 # Local Packages #
-from ..base import CTBIDSImporter
+from ..base import CTImporter
 from ..importspec import ImportSpec
 
 # Third-Party Packages #
@@ -29,7 +29,7 @@ from ..importspec import ImportSpec
 
 # Definitions #
 # Classes #
-class CTPiaImporter(CTBIDSImporter):
+class CTPiaImporter(CTImporter):
     ct_pia_spec = [
         ImportSpec("CT", ".nii", Path("CT/CT.nii")),
         ImportSpec("CT", ".json", Path("CT/CT_orig.json")),
@@ -38,8 +38,13 @@ class CTPiaImporter(CTBIDSImporter):
     def __init__(
         self, modality: CT | None = None, src_root: Path | None = None, *, init: bool = True, **kwargs: Any
     ) -> None:
-        specs = self.ct_pia_spec
-        super().__init__(modality=modality, src_root=src_root, specs=specs, init=init, **kwargs)
+        self.modality: Optional[CT] = None
+        self.src_root: Optional[Path] = None
+
+        super().__init__(init=False)
+
+        if init:
+            self.construct(modality=modality, src_root=src_root, specs=self.ct_pia_spec, **kwargs)
 
 
 CT.default_importers["Pia"] = CTPiaImporter

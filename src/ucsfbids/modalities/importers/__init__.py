@@ -11,9 +11,8 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
+from .base import AnatomyImporter, CTImporter, IEEGImporter
+
 # Imports #
 # Local Packages #
-from .modalitybidsimporter import ModalityBIDSImporter
-from .base import AnatomyBIDSImporter
-from .base import CTBIDSImporter 
-from .base import IEEGBIDSImporter 
+from .modalityimporter import ModalityImporter

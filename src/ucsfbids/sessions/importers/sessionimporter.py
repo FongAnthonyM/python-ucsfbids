@@ -2,7 +2,7 @@
 
 """
 # Package Header #
-from ucsfbids.header import __author__, __credits__, __maintainer__, __email__
+from ucsfbids.header import __author__, __credits__, __email__, __maintainer__
 
 # Header #
 __author__ = __author__
@@ -11,27 +11,28 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
-# Imports #
-# Standard Libraries #
-from baseobjects import BaseObject
 from pathlib import Path
 from typing import Any
 
-# Third-Party Packages #
+# Imports #
+# Standard Libraries #
+from baseobjects import BaseObject
 
 # Local Packages #
 from ..session import Session
 
+# Third-Party Packages #
+
 
 # Definitions #
 # Classes #
-class SessionBIDSImporter(BaseObject):
+class SessionImporter(BaseObject):
     # Magic Methods #
     # Construction/Destruction
     def __init__(
         self,
         session: Session | None = None,
-        src_root : Path | None = None,
+        src_root: Path | None = None,
         *,
         init: bool = True,
         **kwargs: Any,
@@ -90,4 +91,4 @@ class SessionBIDSImporter(BaseObject):
 
 
 # Assign Exporter
-Session.default_importers["BIDS"] = SessionBIDSImporter
+Session.default_importers["BIDS"] = SessionImporter

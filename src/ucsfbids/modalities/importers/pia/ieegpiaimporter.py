@@ -10,16 +10,17 @@ __credits__ = __credits__
 __maintainer__ = __maintainer__
 __email__ = __email__
 
-from pathlib import Path
-from typing import Any
-import subprocess
-import shutil
-import pandas as pd
 import json
+import shutil
+import subprocess
+from pathlib import Path
+from typing import Any, Optional
+
+import pandas as pd
 from scipy.io import loadmat
 
 from ...ieeg import IEEG
-from ..base import IEEGBIDSImporter
+from ..base import IEEGImporter
 from ..importspec import ImportSpec
 
 
@@ -69,7 +70,7 @@ def create_coords(_, new_path):
 
 
 # Classes #
-class IEEGPiaImporter(IEEGBIDSImporter):
+class IEEGPiaImporter(IEEGImporter):
     ieeg_pia_specs = [
         ImportSpec("electrodes", ".tsv", Path("elecs/clinical_TDT_elecs_all.mat"), copy_command=convert_electrodes),
         ImportSpec("coordsystem", ".json", Path(""), copy_command=create_coords),
@@ -78,7 +79,13 @@ class IEEGPiaImporter(IEEGBIDSImporter):
     def __init__(
         self, modality: IEEG | None = None, src_root: Path | None = None, *, init: bool = True, **kwargs: Any
     ) -> None:
-        super().__init__(modality=modality, src_root=src_root, specs=self.ieeg_pia_specs, init=init, **kwargs)
+        self.modality: Optional[IEEG] = None
+        self.src_root: Optional[Path] = None
+
+        super().__init__(init=False)
+
+        if init:
+            self.construct(modality=modality, src_root=src_root, specs=self.ieeg_pia_specs, **kwargs)
 
     def import_all_files(self, path: Path) -> None:
         if self.modality is None:

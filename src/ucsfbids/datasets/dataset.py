@@ -11,16 +11,17 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
-# Imports #
-# Standard Libraries #
-from baseobjects import BaseComposite
 from pathlib import Path
 from typing import Any
 
-# Third-Party Packages #
+# Imports #
+# Standard Libraries #
+from baseobjects import BaseComposite
 
 # Local Packages #
 from ..subjects import Subject
+
+# Third-Party Packages #
 
 
 # Definitions #

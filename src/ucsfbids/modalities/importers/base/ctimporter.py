@@ -1,8 +1,8 @@
-"""anatomybidsexporter.py
+"""ctbidsexporter.py
 
 """
 # Package Header #
-from ucsfbids.header import *
+from ucsfbids.header import __author__, __credits__, __email__, __maintainer__
 
 # Header #
 __author__ = __author__
@@ -18,18 +18,18 @@ from typing import Any
 # Standard Libraries #
 from baseobjects import BaseObject
 
-from ...anatomy import Anatomy
+from ...ct import CT
 
 # Local Packages #
-from ..modalitybidsimporter import ModalityBIDSImporter
+from ..modalityimporter import ModalityImporter
 
 # Third-Party Packages #
 
 
 # Definitions #
 # Classes #
-class AnatomyBIDSImporter(ModalityBIDSImporter):
+class CTImporter(ModalityImporter):
     pass
 
 
-Anatomy.default_importers["BIDS"] = AnatomyBIDSImporter
+CT.default_importers["BIDS"] = CTImporter

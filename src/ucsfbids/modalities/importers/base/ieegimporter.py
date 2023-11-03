@@ -1,4 +1,4 @@
-"""ctbidsexporter.py
+"""ieegbidsexporter.py
 
 """
 # Package Header #
@@ -10,7 +10,6 @@ __credits__ = __credits__
 __maintainer__ = __maintainer__
 __email__ = __email__
 
-
 from pathlib import Path
 from typing import Any
 
@@ -18,17 +17,18 @@ from typing import Any
 # Standard Libraries #
 from baseobjects import BaseObject
 
-from ...ct import CT
+from ...ieeg import IEEG
+
 # Local Packages #
-from ..modalitybidsimporter import ModalityBIDSImporter
+from ..modalityimporter import ModalityImporter
 
 # Third-Party Packages #
 
 
-
 # Definitions #
 # Classes #
-class CTBIDSImporter(ModalityBIDSImporter):
+class IEEGImporter(ModalityImporter):
     pass
 
-CT.default_importers["BIDS"] = CTBIDSImporter
+
+IEEG.default_importers["BIDS"] = IEEGImporter

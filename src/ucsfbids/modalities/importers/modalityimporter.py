@@ -30,7 +30,7 @@ from .importspec import ImportSpec
 
 # Definitions #
 # Classes #
-class ModalityBIDSImporter(BaseObject):
+class ModalityImporter(BaseObject):
     import_file_names: set[str] = set()
     import_exclude_names: set[str] = set()
 
@@ -149,4 +149,4 @@ class ModalityBIDSImporter(BaseObject):
 
 
 # Assign Exporter
-Modality.default_importers["BIDS"] = ModalityBIDSImporter
+Modality.default_importers["BIDS"] = ModalityImporter

@@ -2,7 +2,8 @@
 
 """
 # Package Header #
-from ucsfbids.header import __author__, __credits__, __maintainer__, __email__
+from ucsfbids.header import __author__, __credits__, __email__, __maintainer__
+from ucsfbids.subjects.subject import Subject
 
 # Header #
 __author__ = __author__
@@ -11,34 +12,36 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
+from pathlib import Path
+from typing import Any, List, Optional
+
 # Imports #
 # Standard Libraries #
 from baseobjects import BaseObject
-from pathlib import Path
-from typing import Any
-
-# Third-Party Packages #
 
 # Local Packages #
 from ..dataset import Dataset
 
+# Third-Party Packages #
+
 
 # Definitions #
 # Classes #
-class DatasetBIDSImporter(BaseObject):
+class DatasetImporter(BaseObject):
     # Magic Methods #
     # Construction/Destruction
     def __init__(
         self,
         dataset: Dataset | None = None,
         src_root: Path | None = None,
+        subjects: List[str] = [],
         *,
         init: bool = True,
         **kwargs: Any,
     ) -> None:
         # New Attributes #
         self.dataset: Dataset | None = None
-        self.src_roott: Path | None = None
+        self.src_root: Path | None = None
 
         # Parent Attributes #
         super().__init__(init=False)
@@ -48,6 +51,7 @@ class DatasetBIDSImporter(BaseObject):
             self.construct(
                 dataset=dataset,
                 src_root=src_root,
+                subjects=subjects,
                 **kwargs,
             )
 
@@ -57,6 +61,7 @@ class DatasetBIDSImporter(BaseObject):
         self,
         dataset: Dataset | None = None,
         src_root: Path | None = None,
+        subjects: List[str] = [],
         **kwargs: Any,
     ) -> None:
         """Constructs this object.
@@ -69,6 +74,13 @@ class DatasetBIDSImporter(BaseObject):
 
         if src_root is not None:
             self.src_root = src_root
+
+        if self.dataset is None:
+            return
+
+        for subject in subjects:
+            if subject not in self.dataset.subjects:
+                self.dataset.create_new_subject(Subject, subject)
 
         super().construct(**kwargs)
 
@@ -84,5 +96,5 @@ class DatasetBIDSImporter(BaseObject):
         self.import_subjects(path=new_path)
 
 
-# Assign Exporter
-Dataset.default_importers["BIDS"] = DatasetBIDSImporter
+# Assign Importer
+Dataset.default_importers["BIDS"] = DatasetImporter

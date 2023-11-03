@@ -11,19 +11,21 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
+from pathlib import Path
+from typing import Any
+
 # Imports #
 # Standard Libraries #
 from baseobjects import BaseComposite
 from baseobjects.cachingtools import CachingObject, timed_keyless_cache
-from pathlib import Path
-from typing import Any
 
 # Third-Party Packages #
 from cdfs import CDFS
 
+from .exporters import IEEGBIDSExporter
+
 # Local Packages #
 from .ieeg import IEEG
-from .exporters import IEEGBIDSExporter
 
 
 # Definitions #

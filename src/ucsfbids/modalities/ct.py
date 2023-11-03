@@ -11,20 +11,22 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
+from pathlib import Path
+from typing import Any
+
 # Imports #
 # Standard Libraries #
 from baseobjects import BaseComposite
-from baseobjects.cachingtools import CachingObject, timed_keyless_cache
-from pathlib import Path
-from typing import Any
+from baseobjects.cachingtools import CachingObject  # , timed_keyless_cache
 
 # Third-Party Packages #
 from cdfs import CDFS
 
+from .exporters import CTBIDSExporter
+from .importers import CTImporter
+
 # Local Packages #
 from .modality import Modality
-from .exporters import CTBIDSExporter
-from .importers import CTBIDSImporter
 
 
 # Definitions #
@@ -62,7 +64,7 @@ class CT(Modality):
     default_meta_info: dict[str, Any] = Modality.default_meta_info.copy()
     default_name: str = "ct"
     default_exporters: dict[str, type] = {"BIDS": CTBIDSExporter}
-    default_importers: dict[str, type] = {"BIDS": CTBIDSImporter}
+    default_importers: dict[str, type] = {"BIDS": CTImporter}
 
     # Magic Methods #
     # Construction/Destruction

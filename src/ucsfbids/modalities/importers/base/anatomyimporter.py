@@ -1,14 +1,15 @@
-"""ieegbidsexporter.py
+"""anatomybidsexporter.py
 
 """
 # Package Header #
-from ucsfbids.header import __author__, __credits__, __email__, __maintainer__
+from ucsfbids.header import *
 
 # Header #
 __author__ = __author__
 __credits__ = __credits__
 __maintainer__ = __maintainer__
 __email__ = __email__
+
 
 from pathlib import Path
 from typing import Any
@@ -17,17 +18,18 @@ from typing import Any
 # Standard Libraries #
 from baseobjects import BaseObject
 
-from ...ieeg import IEEG
+from ...anatomy import Anatomy
+
 # Local Packages #
-from ..modalitybidsimporter import ModalityBIDSImporter
+from ..modalityimporter import ModalityImporter
 
 # Third-Party Packages #
 
 
-
 # Definitions #
 # Classes #
-class IEEGBIDSImporter(ModalityBIDSImporter):
+class AnatomyImporter(ModalityImporter):
     pass
 
-IEEG.default_importers["BIDS"] = IEEGBIDSImporter
+
+Anatomy.default_importers["BIDS"] = AnatomyImporter

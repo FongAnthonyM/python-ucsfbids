@@ -2,7 +2,7 @@
 
 """
 # Package Header #
-from ucsfbids.header import __author__, __credits__, __maintainer__, __email__
+from ucsfbids.header import __author__, __credits__, __email__, __maintainer__
 
 # Header #
 __author__ = __author__
@@ -11,21 +11,22 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
-# Imports #
-# Standard Libraries #
-from baseobjects import BaseObject
 from pathlib import Path
 from typing import Any
 
-# Third-Party Packages #
+# Imports #
+# Standard Libraries #
+from baseobjects import BaseObject
 
 # Local Packages #
 from ..subject import Subject
 
+# Third-Party Packages #
+
 
 # Definitions #
 # Classes #
-class SubjectBIDSImporter(BaseObject):
+class SubjectImporter(BaseObject):
     # Magic Methods #
     # Construction/Destruction
     def __init__(
@@ -38,7 +39,7 @@ class SubjectBIDSImporter(BaseObject):
     ) -> None:
         # New Attributes #
         self.subject: Subject | None = None
-        self.src_roott: Path | None = None
+        self.src_root: Path | None = None
 
         # Parent Attributes #
         super().__init__(init=False)
@@ -85,4 +86,4 @@ class SubjectBIDSImporter(BaseObject):
 
 
 # Assign Exporter
-Subject.default_importers["BIDS"] = SubjectBIDSImporter
+Subject.default_importers["BIDS"] = SubjectImporter

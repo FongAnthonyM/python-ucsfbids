@@ -11,21 +11,24 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
+from pathlib import Path
+from typing import Any
+
+import pandas as pd
+
 # Imports #
 # Standard Libraries #
 from baseobjects import BaseComposite
 from baseobjects.cachingtools import CachingObject, timed_keyless_cache
-from pathlib import Path
-from typing import Any
 
 # Third-Party Packages #
 from cdfs import CDFS
-import pandas as pd
+
+from .exporters import IEEGBIDSExporter
+from .importers import IEEGImporter
 
 # Local Packages #
 from .modality import Modality
-from .exporters import IEEGBIDSExporter
-from .importers import IEEGBIDSImporter
 
 
 # Definitions #
@@ -63,7 +66,7 @@ class IEEG(Modality):
     default_meta_info: dict[str, Any] = Modality.default_meta_info.copy()
     default_name: str = "ieeg"
     default_exporters: dict[str, type] = {"BIDS": IEEGBIDSExporter}
-    default_importers: dict[str, type] = {"BIDS": IEEGBIDSImporter}
+    default_importers: dict[str, type] = {"BIDS": IEEGImporter}
 
     # Magic Methods #
     # Construction/Destruction
