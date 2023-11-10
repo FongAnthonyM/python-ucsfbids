@@ -1,10 +1,8 @@
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
+from typing import Callable, NamedTuple
 
 
-@dataclass
-class ImportSpec:
+class FileSpec(NamedTuple):
     suffix: str
     extension: str
     path_from_root: Path

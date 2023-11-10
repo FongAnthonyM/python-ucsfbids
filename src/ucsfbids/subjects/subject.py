@@ -11,16 +11,17 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
-# Imports #
-# Standard Libraries #
-from baseobjects import BaseComposite
 from pathlib import Path
 from typing import Any
 
-# Third-Party Packages #
+# Imports #
+# Standard Libraries #
+from baseobjects import BaseComposite
 
 # Local Packages #
 from ..sessions import Session
+
+# Third-Party Packages #
 
 
 # Definitions #
@@ -206,8 +207,8 @@ class Subject(BaseComposite):
         )
         return new_session
 
-    def create_importer(self, type_: str, src_root: Path | None) -> Any:
-        return self.importers[type_](subject=self, src_root=src_root)
+    def create_importer(self, type_: str, src_root: Path | None, **kwargs) -> Any:
+        return self.importers[type_](subject=self, src_root=src_root, **kwargs)
 
     def create_exporter(self, type_: str) -> Any:
         return self.exporters[type_](subject=self)

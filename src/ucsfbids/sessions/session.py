@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+
 # Third-Party Packages #
 from baseobjects import BaseComposite
 from baseobjects.cachingtools.cachingobject import CachingObject
@@ -283,8 +284,8 @@ class Session(CachingObject, DispatchableClass):
             {m.name: m for p in self.path.iterdir() if p.is_dir() and (m := Modality(path=p, mode=mode)) is not None},
         )
 
-    def create_importer(self, type_: str, src_root: Path | None) -> Any:
-        return self.importers[type_](session=self, src_root=src_root)
+    def create_importer(self, type_: str, src_root: Path | None, **kwargs) -> Any:
+        return self.importers[type_](session=self, src_root=src_root, **kwargs)
 
     def create_exporter(self, type_):
         return self.exporters[type_](session=self)

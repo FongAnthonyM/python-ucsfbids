@@ -11,21 +11,20 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
-import os
+# Imports #
+# Standard Libraries #
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Any, List
-
-# Imports #
-# Standard Libraries #
-from baseobjects import BaseObject
+from typing import Any, Optional
 
 # Local Packages #
-from ..modality import Modality
-from .importspec import ImportSpec
+from baseobjects import BaseObject
+
+from ucsfbids.importspec import FileSpec
 
 # Third-Party Packages #
+from ucsfbids.modalities import Modality
 
 
 # Definitions #
@@ -38,17 +37,17 @@ class ModalityImporter(BaseObject):
     # Construction/Destruction
     def __init__(
         self,
-        modality: Modality | None = None,
-        src_root: Path | None = None,
-        specs: List[ImportSpec] = [],
+        modality: Optional[Modality] = None,
+        src_root: Optional[Path] = None,
+        files: list[FileSpec] = [],
         *,
         init: bool = True,
         **kwargs: Any,
     ) -> None:
         # New Attributes #
-        self.modality: Modality | None = None
-        self.src_root: Path | None = None
-        self.specs: List[ImportSpec] = []
+        self.modality: Optional[Modality] = None
+        self.src_root: Optional[Path] = None
+        self.files: list[FileSpec] = []
 
         # Parent Attributes #
         super().__init__(init=False)
@@ -58,7 +57,7 @@ class ModalityImporter(BaseObject):
             self.construct(
                 modality=modality,
                 src_root=src_root,
-                specs=specs,
+                files=files,
                 **kwargs,
             )
 
@@ -66,9 +65,9 @@ class ModalityImporter(BaseObject):
     # Constructors/Destructors
     def construct(
         self,
-        modality: Modality | None = None,
-        src_root: Path | None = None,
-        specs: List[ImportSpec] = [],
+        modality: Optional[Modality] = None,
+        src_root: Optional[Path] = None,
+        files: list[FileSpec] = [],
         **kwargs: Any,
     ) -> None:
         """Constructs this object.
@@ -79,70 +78,78 @@ class ModalityImporter(BaseObject):
         if modality is not None:
             self.modality = modality
 
-        if src_root:
+        if src_root is not None:
             self.src_root = src_root
 
-        if specs:
-            self.specs = specs
+        if files:
+            self.files = files
 
         super().construct(**kwargs)
 
+    def _import_file(self, file: FileSpec, old_path: Path, new_path: Path):
+        if file.copy_command is None:
+            shutil.copy(old_path, new_path)
+        elif isinstance(file.copy_command, str):
+            subprocess.run(f"{file.copy_command} {old_path} {new_path}")
+        elif callable(file.copy_command):
+            file.copy_command(old_path, new_path)
+
+        if file.post_command is not None:
+            subprocess.run(f"{file.post_command} {new_path}")
+
     def import_all_files(self, path: Path) -> None:
-        if self.modality is None:
-            raise RuntimeError("Undefined Modality")
-        for importspec in self.specs:
-            subject_name = self.modality.subject_name
-            if subject_name is None:
-                raise RuntimeError("subject name undefined")
-            if self.src_root is None:
-                raise RuntimeError("Import root undefined")
-            old_path = self.src_root / subject_name / importspec.path_from_root
-            if old_path.is_file():
-                old_name = old_path.name
-                exclude = any(n in old_name for n in self.import_exclude_names)
-                if not exclude:
-                    new_path = path / f"{self.modality.full_name}_{importspec.suffix}{importspec.extension}"
-                    if not new_path.exists():
-                        if importspec.copy_command is not None:
-                            if isinstance(importspec.copy_command, str):
-                                subprocess.run(f"{importspec.copy_command} {old_path} {new_path}")
-                            elif callable(importspec.copy_command):
-                                importspec.copy_command(old_path, new_path)
-                        else:
-                            shutil.copy(old_path, new_path)
-                        if importspec.post_command is not None:
-                            subprocess.run(f"{importspec.post_command} {new_path}")
+        assert self.modality is not None
+        assert self.src_root is not None
+        subject_name = self.modality.subject_name
+        assert subject_name is not None
+
+        for file in self.files:
+            old_path = self.src_root / subject_name / file.path_from_root
+            old_name = old_path.name
+            exclude = any(n in old_name for n in self.import_exclude_names)
+            new_path = path / f"{self.modality.full_name}_{file.suffix}{file.extension}"
+
+            if not old_path.is_file():
+                continue
+
+            if exclude:
+                continue
+
+            if new_path.exists():
+                continue
+
+            self._import_file(file, old_path, new_path)
 
     def import_select_files(self, path: Path) -> None:
-        if self.modality is None:
-            raise RuntimeError("Undefined Modality")
-        for importspec in self.specs:
-            subject_name = self.modality.subject_name
-            if subject_name is None:
-                raise RuntimeError("subject name undefined")
-            if self.src_root is None:
-                raise RuntimeError("Import root undefined")
-            old_path = self.src_root / subject_name / importspec.path_from_root
-            if old_path.is_file():
-                old_name = old_path.name
-                include = any(n in old_name for n in self.import_file_names)
-                exclude = any(n in old_name for n in self.import_exclude_names)
-                if include and not exclude:
-                    new_path = path / f"{self.modality.full_name}_{importspec.suffix}{importspec.extension}"
-                    if not new_path.exists():
-                        if importspec.copy_command is not None:
-                            if isinstance(importspec.copy_command, str):
-                                subprocess.run(f"{importspec.copy_command} {old_path} {new_path}")
-                            elif callable(importspec.copy_command):
-                                importspec.copy_command(old_path, new_path)
-                        else:
-                            shutil.copy(old_path, new_path)
-                        if importspec.post_command is not None:
-                            subprocess.run(f"{importspec.post_command} {new_path}")
+        assert self.modality is not None
+        assert self.src_root is not None
+        subject_name = self.modality.subject_name
+        assert subject_name is not None
+
+        for file in self.files:
+            old_path = self.src_root / subject_name / file.path_from_root
+            old_name = old_path.name
+            include = any(n in old_name for n in self.import_file_names)
+            exclude = any(n in old_name for n in self.import_exclude_names)
+            new_path = path / f"{self.modality.full_name}_{file.suffix}{file.extension}"
+
+            if not old_path.is_file():
+                continue
+
+            if exclude:
+                continue
+
+            if not include:
+                continue
+
+            if new_path.exists():
+                continue
+
+            self._import_file(file, old_path, new_path)
 
     def execute_import(self, path: Path) -> None:
-        if self.modality is None:
-            raise RuntimeError("Undefined Modality")
+        assert self.modality is not None
+
         new_path = path / f"{self.modality.name}"
         new_path.mkdir(exist_ok=True)
         self.import_all_files(path=new_path)

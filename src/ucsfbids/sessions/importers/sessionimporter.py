@@ -1,4 +1,4 @@
-"""subject.py
+"""sessionimporter.py
 
 """
 # Package Header #
@@ -12,52 +12,51 @@ __email__ = __email__
 
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
-# Imports #
-# Standard Libraries #
 from baseobjects import BaseObject
 
-# Local Packages #
-from ..session import Session
-
-# Third-Party Packages #
+from ucsfbids.importspec import ModalitySpec
+from ucsfbids.sessions.session import Session
 
 
-# Definitions #
-# Classes #
 class SessionImporter(BaseObject):
-    # Magic Methods #
-    # Construction/Destruction
     def __init__(
         self,
-        session: Session | None = None,
-        src_root: Path | None = None,
+        session: Optional[Session] = None,
+        src_root: Optional[Path] = None,
+        modalities: list[ModalitySpec] = [],
         *,
         init: bool = True,
         **kwargs: Any,
     ) -> None:
-        # New Attributes #
-        self.session: Session | None = None
-        self.src_root: Path | None = None
+        self.session: Optional[Session] = None
+        self.src_root: Optional[Path] = None
 
-        # Parent Attributes #
         super().__init__(init=False)
 
-        # Object Construction #
         if init:
             self.construct(
                 session=session,
                 src_root=src_root,
+                modalities=modalities,
                 **kwargs,
             )
 
-    # Instance Methods #
-    # Constructors/Destructors
+    def _process_modalities(self, modalities: list[ModalitySpec]):
+        assert self.session is not None
+
+        for modality in modalities:  # FIX: add to importers not default_importers
+            modality.modality_type.default_importers[modality.importer_key] = modality.importer
+            mod = modality.modality_type(parent_path=self.session.path, mode=self.session._mode)
+            self.session.modalities[modality.name] = mod  # FIX: modality is a RegisteredClass
+        self.session.create()
+
     def construct(
         self,
-        session: Session | None = None,
-        src_root: Path | None = None,
+        session: Optional[Session] = None,
+        src_root: Optional[Path] = None,
+        modalities: list[ModalitySpec] = [],
         **kwargs: Any,
     ) -> None:
         """Constructs this object.
@@ -71,24 +70,24 @@ class SessionImporter(BaseObject):
         if src_root is not None:
             self.src_root = src_root
 
+        self._process_modalities(modalities)
         super().construct(**kwargs)
 
     def import_modalities(self, path: Path):
-        if self.session is None:
-            raise RuntimeError("Undefined Session.")
+        assert self.session is not None
+
         for modality in self.session.modalities.values():
             modality.create_importer("BIDS", self.src_root).execute_import(path)
 
     def execute_import(self, path: Path, name: str | None = None) -> None:
-        if self.session is None:
-            raise RuntimeError("Undefined Session.")
+        assert self.session is not None
         if name is None:
             name = self.session.name
+        assert name is not None
 
         new_path = path / f"ses-{name}"
         new_path.mkdir(exist_ok=True)
         self.import_modalities(path=new_path)
 
 
-# Assign Exporter
 Session.default_importers["BIDS"] = SessionImporter

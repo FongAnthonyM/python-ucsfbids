@@ -1,34 +1,28 @@
 """ieegbidsexporter.py
 
 """
-# Package Header #
+
 from ucsfbids.header import __author__, __credits__, __email__, __maintainer__
 
-# Header #
 __author__ = __author__
 __credits__ = __credits__
 __maintainer__ = __maintainer__
 __email__ = __email__
 
 import json
-import shutil
-import subprocess
 from pathlib import Path
 from typing import Any, Optional
 
 import pandas as pd
 from scipy.io import loadmat
 
-from ...ieeg import IEEG
-from ..base import IEEGImporter
-from ..importspec import ImportSpec
+from ucsfbids.importspec import FileSpec
+from ucsfbids.modalities import IEEG, Modality
+from ucsfbids.modalities.importers.base import IEEGImporter
 
 
-# Definitions #
-# Functions #
 def convert_electrodes(old_path, new_path):
-    if not old_path.is_file():
-        pass
+    assert old_path.is_file()
     original_montage = loadmat(old_path, squeeze_me=True)
     bids_montage = pd.DataFrame(
         columns=[
@@ -69,61 +63,57 @@ def create_coords(_, new_path):
     pass
 
 
-# Classes #
+DEFAULT_FILES = [
+    FileSpec("electrodes", ".tsv", Path("elecs/clinical_TDT_elecs_all.mat"), copy_command=convert_electrodes),
+    FileSpec("coordsystem", ".json", Path(""), copy_command=create_coords),
+]
+
+
 class IEEGPiaImporter(IEEGImporter):
-    ieeg_pia_specs = [
-        ImportSpec("electrodes", ".tsv", Path("elecs/clinical_TDT_elecs_all.mat"), copy_command=convert_electrodes),
-        ImportSpec("coordsystem", ".json", Path(""), copy_command=create_coords),
-    ]
-
-    def __init__(
-        self, modality: IEEG | None = None, src_root: Path | None = None, *, init: bool = True, **kwargs: Any
+    def construct(
+        self,
+        modality: Optional[Modality] = None,
+        src_root: Optional[Path] = None,
+        files: list[FileSpec] = [],
+        **kwargs: Any,
     ) -> None:
-        self.modality: Optional[IEEG] = None
-        self.src_root: Optional[Path] = None
+        if modality is not None:
+            self.modality = modality
 
-        super().__init__(init=False)
+        if src_root is not None:
+            self.src_root = src_root
 
-        if init:
-            self.construct(modality=modality, src_root=src_root, specs=self.ieeg_pia_specs, **kwargs)
+        files.extend(DEFAULT_FILES)
+        self.files = files
+        super().construct(**kwargs)
 
     def import_all_files(self, path: Path) -> None:
-        if self.modality is None:
-            raise RuntimeError("Undefined Modality")
+        assert self.modality is not None
+        assert self.modality.subject_name is not None
+        assert self.src_root is not None
 
-        for importspec in self.specs:
-            if self.modality.subject_name is None:
-                raise RuntimeError("subject name undefined")
-
-            if self.src_root is None:
-                raise RuntimeError("Import root undefined")
-
+        for file in self.files:
             subject_name = self.modality.subject_name
             imaging_root = self.src_root / "data_store2/imaging/subjects"
-            imaging_path = imaging_root / subject_name / importspec.path_from_root
-            new_path = path / f"{self.modality.full_name}_{importspec.suffix}{importspec.extension}"
+            imaging_path = imaging_root / subject_name / file.path_from_root
+            new_path = path / f"{self.modality.full_name}_{file.suffix}{file.extension}"
+            old_name = imaging_path.name
+            exclude = any(n in old_name for n in self.import_exclude_names)
+
+            if new_path.exists():
+                continue
+
+            if exclude:
+                continue
 
             if imaging_path.is_file():
-                old_name = imaging_path.name
-                exclude = any(n in old_name for n in self.import_exclude_names)
+                self._import_file(file, imaging_path, new_path)
+                continue
 
-                if not exclude:
-                    if not new_path.exists():
-                        if importspec.copy_command is not None:
-                            if isinstance(importspec.copy_command, str):
-                                subprocess.run(f"{importspec.copy_command} {imaging_path} {new_path}")
-                            elif callable(importspec.copy_command):
-                                importspec.copy_command(imaging_path, new_path)
-                        else:
-                            shutil.copy(imaging_path, new_path)
+            if not callable(file.copy_command):
+                raise RuntimeError("No source file but no function provided to gather data")
 
-                        if importspec.post_command is not None:
-                            subprocess.run(f"{importspec.post_command} {new_path}")
-            elif not new_path.exists():
-                if not callable(importspec.copy_command):
-                    raise RuntimeError("No source file but no function provided to gather data")
-                else:
-                    importspec.copy_command(imaging_path, new_path)
+            file.copy_command(imaging_path, new_path)
 
 
 IEEG.default_importers["Pia"] = IEEGPiaImporter

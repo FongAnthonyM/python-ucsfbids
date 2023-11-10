@@ -1,50 +1,58 @@
 """ctbidsexporter.py
 
 """
-# Package Header #
+
 from ucsfbids.header import __author__, __credits__, __email__, __maintainer__
 
-# Header #
 __author__ = __author__
 __credits__ = __credits__
 __maintainer__ = __maintainer__
 __email__ = __email__
 
 
+from json import dump, load
 from pathlib import Path
 from typing import Any, Optional
 
-# Imports #
-# Standard Libraries #
-from baseobjects import BaseObject
-
-from ...ct import CT
-
-# Local Packages #
-from ..base import CTImporter
-from ..importspec import ImportSpec
-
-# Third-Party Packages #
+from ucsfbids.importspec import FileSpec
+from ucsfbids.modalities import CT, Modality
+from ucsfbids.modalities.importers.base import CTImporter
 
 
-# Definitions #
-# Classes #
+def strip_json(old_path, new_path):
+    with open(old_path, "r") as f:
+        data_orig = load(f)
+
+    data_clean = {key: value for key, value in data_orig.values() if key not in TO_STRIP}
+
+    with open(new_path, "w") as f:
+        dump(data_clean, f)
+
+
+TO_STRIP = ["InstitutionName", "InstitutionalDepartmentName", "InstitutionAddress", "DeviceSerialNumber"]
+DEFAULT_FILES = [
+    FileSpec("CT", ".nii", Path("CT/CT.nii")),
+    FileSpec("CT", ".json", Path("CT/CT_orig.json"), copy_command=strip_json),
+]
+
+
 class CTPiaImporter(CTImporter):
-    ct_pia_spec = [
-        ImportSpec("CT", ".nii", Path("CT/CT.nii")),
-        ImportSpec("CT", ".json", Path("CT/CT_orig.json")),
-    ]
-
-    def __init__(
-        self, modality: CT | None = None, src_root: Path | None = None, *, init: bool = True, **kwargs: Any
+    def construct(
+        self,
+        modality: Optional[Modality] = None,
+        src_root: Optional[Path] = None,
+        files: list[FileSpec] = [],
+        **kwargs: Any,
     ) -> None:
-        self.modality: Optional[CT] = None
-        self.src_root: Optional[Path] = None
+        if modality is None:
+            self.modality = modality
 
-        super().__init__(init=False)
+        if src_root is None:
+            self.src_root = src_root
 
-        if init:
-            self.construct(modality=modality, src_root=src_root, specs=self.ct_pia_spec, **kwargs)
+        files.extend(DEFAULT_FILES)
+        self.files = files
+        super().construct(**kwargs)
 
 
 CT.default_importers["Pia"] = CTPiaImporter

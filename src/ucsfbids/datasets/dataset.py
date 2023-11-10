@@ -129,7 +129,7 @@ class Dataset(BaseComposite):
             self.name = name
 
         if path is not None:
-            self.path = path
+            self.path = Path(path)
 
         if mode is not None:
             self._mode = mode
@@ -207,8 +207,8 @@ class Dataset(BaseComposite):
         )
         return new_subject
 
-    def create_importer(self, type_: str, src_root: Path | None) -> Any:
-        return self.importers[type_](dataset=self, src_root=src_root)
+    def create_importer(self, type_: str, src_root: Path | None, **kwargs) -> Any:
+        return self.importers[type_](dataset=self, src_root=src_root, **kwargs)
 
     def create_exporter(self, type_: str) -> Any:
         return self.exporters[type_](dataset=self)
