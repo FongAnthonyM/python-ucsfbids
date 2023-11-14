@@ -25,7 +25,6 @@ from baseobjects.cachingtools import CachingObject, timed_keyless_cache
 from cdfs import CDFS
 
 from .exporters import IEEGBIDSExporter
-from .importers import IEEGImporter
 
 # Local Packages #
 from .modality import Modality
@@ -66,7 +65,7 @@ class IEEG(Modality):
     default_meta_info: dict[str, Any] = Modality.default_meta_info.copy()
     default_name: str = "ieeg"
     default_exporters: dict[str, type] = {"BIDS": IEEGBIDSExporter}
-    default_importers: dict[str, type] = {"BIDS": IEEGImporter}
+    default_importers: dict[str, type] = {}
 
     # Magic Methods #
     # Construction/Destruction

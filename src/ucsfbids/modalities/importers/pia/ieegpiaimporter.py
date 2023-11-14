@@ -17,7 +17,7 @@ import pandas as pd
 from scipy.io import loadmat
 
 from ucsfbids.importspec import FileSpec
-from ucsfbids.modalities import IEEG, Modality
+from ucsfbids.modalities import IEEG
 from ucsfbids.modalities.importers.base import IEEGImporter
 
 
@@ -72,7 +72,7 @@ DEFAULT_FILES = [
 class IEEGPiaImporter(IEEGImporter):
     def construct(
         self,
-        modality: Optional[Modality] = None,
+        modality: Optional[IEEG] = None,
         src_root: Optional[Path] = None,
         files: list[FileSpec] = [],
         **kwargs: Any,

@@ -260,3 +260,7 @@ class Modality(CachingObject, BaseComposite, DispatchableClass):
 
     def create_exporter(self, type_: str) -> Any:
         return self.exporters[type_](modality=self)
+
+    def add_importer(self, type_: str, importer: type):
+        assert type_ not in self.importers
+        self.importers[type_] = importer

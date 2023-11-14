@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from ucsfbids.importspec import FileSpec
-from ucsfbids.modalities import Anatomy, Modality
+from ucsfbids.modalities import Anatomy
 from ucsfbids.modalities.importers.base import AnatomyImporter
 
 
@@ -40,7 +40,7 @@ DEFAULT_FILES = [
 class AnatomyPiaImporter(AnatomyImporter):
     def construct(
         self,
-        modality: Optional[Modality] = None,
+        modality: Optional[Anatomy] = None,
         src_root: Optional[Path] = None,
         files: list[FileSpec] = [],
         **kwargs: Any,

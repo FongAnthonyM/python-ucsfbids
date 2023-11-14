@@ -54,13 +54,12 @@ def _update_ignore(path, entries):
 class DatasetPiaImporter(DatasetImporter):
     def _process_subjects(self, subjects: list[str]):
         assert self.dataset is not None
-        Subject.default_importers["Pia"] = SubjectPiaImporter
 
         for subject in subjects:
-            if subject in self.dataset.subjects:
-                self.dataset.subjects[subject].default_importers["Pia"] = SubjectPiaImporter
-                continue
-            self.dataset.create_new_subject(Subject, subject)
+            if subject not in self.dataset.subjects:
+                print(subject)
+                self.dataset.create_new_subject(Subject, subject)
+            self.dataset.subjects[subject].add_importer("Pia", SubjectPiaImporter)
 
     def construct(
         self,
@@ -75,6 +74,7 @@ class DatasetPiaImporter(DatasetImporter):
         if src_root is not None:
             self.src_root = src_root
 
+        print(subjects)
         self._process_subjects(subjects)
         super().construct(**kwargs)
 
@@ -82,7 +82,10 @@ class DatasetPiaImporter(DatasetImporter):
         assert self.dataset is not None
 
         participants_tsv_path = path / "participants.tsv"
-        participants_tsv_data = pd.read_csv(participants_tsv_path, sep="\t")
+        if participants_tsv_path.is_file():
+            participants_tsv_data = pd.read_csv(participants_tsv_path, sep="\t")
+        else:
+            participants_tsv_data = pd.DataFrame(columns=["participant_id"])
 
         for subject in self.dataset.subjects.values():
             if subject in participants_tsv_data["participant_id"].values and not overwrite:

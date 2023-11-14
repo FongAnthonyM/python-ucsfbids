@@ -15,7 +15,7 @@ from typing import Any, Optional
 
 from baseobjects import BaseObject
 
-from ucsfbids.importspec import SessionSpec
+from ucsfbids.importspec.sessionspec import SessionSpec
 from ucsfbids.sessions import Session
 from ucsfbids.subjects.subject import Subject
 
@@ -47,11 +47,10 @@ class SubjectImporter(BaseObject):
         assert self.subject is not None
 
         for session in sessions:
-            if session.name in self.subject.sessions:  # FIX: add to importers, not default_importers
-                self.subject.sessions[session.name].default_importers[session.importer_name] = session.importer_type
-                break
-            Session.default_importers[session.importer_name] = session.importer_type
-            self.subject.create_new_session(Session, session.name, self.subject._mode)
+            if session.name not in self.subject.sessions:
+                self.subject.create_new_session(Session, session.name, self.subject._mode)
+            self.subject.sessions[session.name].add_importer(session.importer, session.importer_type)
+            # self.subject.sessions[session.name].importers[session.importer_name] = session.importer_type
 
     def construct(
         self,

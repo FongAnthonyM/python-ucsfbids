@@ -3,6 +3,7 @@
 """
 # Package Header #
 from ucsfbids.header import __author__, __credits__, __email__, __maintainer__
+from ucsfbids.modalities.modality import Modality
 
 # Header #
 __author__ = __author__
@@ -46,10 +47,12 @@ class SessionImporter(BaseObject):
     def _process_modalities(self, modalities: list[ModalitySpec]):
         assert self.session is not None
 
-        for modality in modalities:  # FIX: add to importers not default_importers
-            modality.modality_type.default_importers[modality.importer_key] = modality.importer
-            mod = modality.modality_type(parent_path=self.session.path, mode=self.session._mode)
-            self.session.modalities[modality.name] = mod  # FIX: modality is a RegisteredClass
+        for modality in modalities:
+            assert issubclass(modality.modality_type, Modality)
+            if modality.name not in self.session.modalities:
+                mod = modality.modality_type(parent_path=self.session.path, mode=self.session._mode)
+                self.session.modalities[modality.name] = mod
+            self.session.modalities[modality.name].add_importer(modality.importer_key, modality.importer)
         self.session.create()
 
     def construct(
@@ -77,6 +80,7 @@ class SessionImporter(BaseObject):
         assert self.session is not None
 
         for modality in self.session.modalities.values():
+            assert issubclass(modality, Modality)
             modality.create_importer("BIDS", self.src_root).execute_import(path)
 
     def execute_import(self, path: Path, name: str | None = None) -> None:

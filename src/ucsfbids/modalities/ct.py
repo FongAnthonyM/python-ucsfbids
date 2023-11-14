@@ -23,7 +23,6 @@ from baseobjects.cachingtools import CachingObject  # , timed_keyless_cache
 from cdfs import CDFS
 
 from .exporters import CTBIDSExporter
-from .importers import CTImporter
 
 # Local Packages #
 from .modality import Modality
@@ -64,7 +63,7 @@ class CT(Modality):
     default_meta_info: dict[str, Any] = Modality.default_meta_info.copy()
     default_name: str = "ct"
     default_exporters: dict[str, type] = {"BIDS": CTBIDSExporter}
-    default_importers: dict[str, type] = {"BIDS": CTImporter}
+    default_importers: dict[str, type] = {}
 
     # Magic Methods #
     # Construction/Destruction

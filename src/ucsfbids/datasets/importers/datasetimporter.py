@@ -45,7 +45,7 @@ class DatasetImporter(BaseObject):
         assert self.dataset is not None
 
         for subject in subjects:
-            if subject not in self.dataset.subjects:  # TEST: maybe this is not the right datastructure
+            if subject not in self.dataset.subjects:
                 self.dataset.create_new_subject(Subject, subject)
 
     def construct(
@@ -66,6 +66,7 @@ class DatasetImporter(BaseObject):
         if src_root is not None:
             self.src_root = src_root
 
+        self._process_subjects(subjects)
         super().construct(**kwargs)
 
     def import_subjects(self, path: Path):

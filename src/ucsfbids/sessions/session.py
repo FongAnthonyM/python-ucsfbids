@@ -64,7 +64,7 @@ class Session(CachingObject, DispatchableClass):
         "SessionNamespace": "",
         "SessionType": "",
     }
-    default_modalities: dict[str, type] = {}
+    default_modalities: dict[str, Any] = {}
     default_importers: dict[str, type] = {}
     default_exporters: dict[str, type] = {}
 
@@ -144,7 +144,7 @@ class Session(CachingObject, DispatchableClass):
         self.parent_name: str | None = None
 
         self.meta_info: dict = self.default_meta_info.copy()
-        self.modalities: dict[str, Modality] = {}
+        self.modalities: dict[str, Any] = {}
 
         self.importers: dict[str, type] = self.default_importers.copy()
         self.exporters: dict[str, type] = self.default_exporters.copy()
@@ -184,10 +184,8 @@ class Session(CachingObject, DispatchableClass):
     @property
     def meta_info_path(self) -> Path:
         """The path to the meta information json file."""
-        if self._path is None:
-            raise RuntimeError("path is None")
-            # return None
-        return self._path / f"{self.full_name}_meta.json"  # WARN: path can be none
+        assert self._path is not None
+        return self._path / f"{self.full_name}_meta.json"
 
     # Instance Methods #
     # Constructors/Destructors
@@ -223,8 +221,9 @@ class Session(CachingObject, DispatchableClass):
         elif parent_path is not None and self.name is not None:
             self.path = (parent_path if isinstance(parent_path, Path) else Path(parent_path)) / f"ses-{self.name}"
 
-        if self.path is not None:
-            self.parent_name = self.path.parts[-2][4:]
+        assert self.path is not None
+        # if self.path is not None:
+        self.parent_name = self.path.parts[-2][4:]
 
         if mode is not None:
             self._mode = mode
@@ -266,7 +265,7 @@ class Session(CachingObject, DispatchableClass):
             self.modalities[name] = modality_type(parent_path=self.path, mode=self._mode)
 
     def create_modalities(self) -> None:
-        for name, modality in self.modalities.items():
+        for modality in self.modalities.values():
             modality.create()
 
     def create(self) -> None:
@@ -289,3 +288,7 @@ class Session(CachingObject, DispatchableClass):
 
     def create_exporter(self, type_):
         return self.exporters[type_](session=self)
+
+    def add_importer(self, type_: str, importer: type):
+        assert type_ not in self.importers
+        self.importers[type_] = importer

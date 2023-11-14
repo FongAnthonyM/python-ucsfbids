@@ -11,4 +11,4 @@ if __name__ == "__main__":
     Dataset.default_importers["Pia"] = DatasetPiaImporter
     dataset = Dataset(Path(os.path.expanduser("~/Kleen-Lab/bids-data/")), "test", mode="w")
 
-    dataset.create_importer("Pia", Path(os.path.expanduser("~/pia/"), patients=SUBJECTS)).execute_import()
+    dataset.create_importer("Pia", Path(os.path.expanduser("~/pia/")), subjects=SUBJECTS).execute_import()

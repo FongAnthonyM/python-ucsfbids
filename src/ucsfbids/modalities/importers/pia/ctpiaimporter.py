@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from ucsfbids.importspec import FileSpec
-from ucsfbids.modalities import CT, Modality
+from ucsfbids.modalities import CT
 from ucsfbids.modalities.importers.base import CTImporter
 
 
@@ -39,7 +39,7 @@ DEFAULT_FILES = [
 class CTPiaImporter(CTImporter):
     def construct(
         self,
-        modality: Optional[Modality] = None,
+        modality: Optional[CT] = None,
         src_root: Optional[Path] = None,
         files: list[FileSpec] = [],
         **kwargs: Any,
