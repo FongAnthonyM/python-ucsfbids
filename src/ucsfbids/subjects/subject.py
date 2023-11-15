@@ -135,9 +135,8 @@ class Subject(BaseComposite):
             )
 
     @property
-    def path(self) -> Path:
+    def path(self) -> Optional[Path]:
         """The path to the subject."""
-        assert self._path is not None
         return self._path
 
     @path.setter
@@ -188,15 +187,13 @@ class Subject(BaseComposite):
         if mode is not None:
             self._mode = mode
 
-        if self.path is not None:
-            if name is None:
-                self.name = self.path.stem[4:]
-
-        elif parent_path is not None and self.name is not None:
+        if parent_path is not None and self.name is not None and self.path is None:
             self.path = (parent_path if isinstance(parent_path, Path) else Path(parent_path)) / f"sub-{self.name}"
 
         assert self.path is not None
         self.parent_name = self.path.parts[-2]
+        if name is None:
+            self.name = self.path.stem[4:]
 
         if mode is not None:
             self._mode = mode
@@ -205,7 +202,6 @@ class Subject(BaseComposite):
             if load and self.path.exists():
                 self.load_sessions()
             elif create:
-                print(self.path, parent_path)
                 self.create()
 
         super().construct(**kwargs)
@@ -230,11 +226,13 @@ class Subject(BaseComposite):
 
     def create(self) -> None:
         """Creates and sets up the subject's directory."""
+        assert self.path is not None
         self.path.mkdir(exist_ok=True)
         self.create_meta_info()
 
     def load_sessions(self, mode: str | None = None, load: bool = True) -> None:
         """Loads all sessions in this subject."""
+        assert self.path is not None
         m = self._mode if mode is None else mode
         self.sessions.clear()
         self.sessions.update(
@@ -280,8 +278,6 @@ class Subject(BaseComposite):
         if mode is None:
             mode = self._mode
 
-        print(self.path)
-
         self.sessions[name] = new_session = session(
             name=name,
             parent_path=self.path,
@@ -298,6 +294,6 @@ class Subject(BaseComposite):
     def create_exporter(self, type_: str) -> Any:
         return self.exporters[type_](subject=self)
 
-    def add_importer(self, type_: str, importer: type):
-        assert type_ not in self.importers
-        self.importers[type_] = importer
+    def add_importer(self, type_: str, importer: type, overwrite: bool = False):
+        if type_ not in self.importers or overwrite:
+            self.importers[type_] = importer

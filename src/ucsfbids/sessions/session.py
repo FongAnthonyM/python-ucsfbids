@@ -116,9 +116,11 @@ class Session(CachingObject, DispatchableClass):
         parent_name = path.parts[-2][4:]
 
         meta_info_path = path / f"sub-{parent_name}_ses-{name}_meta.json"
-        with meta_info_path.open("r") as file:
-            info = json.load(file)
-
+        if not meta_info_path.exists():
+            info = cls.default_meta_info
+        else:
+            with meta_info_path.open("r") as file:
+                info = json.load(file)
         return info["SessionNamespace"], info["SessionType"]
 
     # Magic Methods #
@@ -289,6 +291,6 @@ class Session(CachingObject, DispatchableClass):
     def create_exporter(self, type_):
         return self.exporters[type_](session=self)
 
-    def add_importer(self, type_: str, importer: type):
-        assert type_ not in self.importers
-        self.importers[type_] = importer
+    def add_importer(self, type_: str, importer: type, overwrite: bool = False):
+        if type_ not in self.importers or overwrite:
+            self.importers[type_] = importer

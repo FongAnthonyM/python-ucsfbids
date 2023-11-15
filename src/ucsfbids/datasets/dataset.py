@@ -138,7 +138,7 @@ class Dataset(BaseComposite):
             if name is None:
                 self.name = self.path.stem
         elif parent_path is not None and self.name is not None:
-            self.path = (parent_path if isinstance(parent_path, Path) else Path(parent_path)) / f"sub-{self.name}"
+            self.path = (parent_path if isinstance(parent_path, Path) else Path(parent_path)) / f"{self.name}"
 
         if self.path is not None:
             if load and self.path.exists():
@@ -200,8 +200,6 @@ class Dataset(BaseComposite):
         if mode is None:
             mode = self._mode
 
-        print(self.path)
-
         self.subjects[name] = new_subject = subject(
             name=name,
             parent_path=self.path,
@@ -218,6 +216,6 @@ class Dataset(BaseComposite):
     def create_exporter(self, type_: str) -> Any:
         return self.exporters[type_](dataset=self)
 
-    def add_importer(self, type_: str, importer: type):
-        assert type_ not in self.importers
-        self.importers[type_] = importer
+    def add_importer(self, type_: str, importer: type, overwrite: bool = False):
+        if type_ not in self.importers or overwrite:
+            self.importers[type_] = importer

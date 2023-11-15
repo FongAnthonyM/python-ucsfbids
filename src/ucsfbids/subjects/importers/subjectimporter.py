@@ -49,7 +49,7 @@ class SubjectImporter(BaseObject):
         for session in sessions:
             if session.name not in self.subject.sessions:
                 self.subject.create_new_session(Session, session.name, self.subject._mode)
-            self.subject.sessions[session.name].add_importer(session.importer, session.importer_type)
+            self.subject.sessions[session.name].add_importer(session.importer_name, session.importer_type)
             # self.subject.sessions[session.name].importers[session.importer_name] = session.importer_type
 
     def construct(
@@ -57,6 +57,7 @@ class SubjectImporter(BaseObject):
         subject: Subject | None = None,
         src_root: Path | None = None,
         sessions: list[SessionSpec] = [],
+        process: bool = True,
         **kwargs: Any,
     ) -> None:
         """Constructs this object.
@@ -70,8 +71,10 @@ class SubjectImporter(BaseObject):
         if src_root is not None:
             self.src_root = src_root
 
-        self._process_sessions(sessions)
-        super().construct(**kwargs)
+        if process:
+            self._process_sessions(sessions)
+
+        super().construct(process=False, **kwargs)
 
     def import_sessions(self, path: Path):
         assert self.subject is not None
@@ -79,7 +82,7 @@ class SubjectImporter(BaseObject):
         for session in self.subject.sessions.values():
             session.create_importer("BIDS", self.src_root).execute_import(path)
 
-    def execute_import(self, path: Path, name: Optional[str]) -> None:
+    def execute_import(self, path: Path, name: Optional[str] = None) -> None:
         assert self.subject is not None
         if name is None:
             name = self.subject.name

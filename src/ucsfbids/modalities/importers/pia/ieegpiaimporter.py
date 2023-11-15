@@ -64,7 +64,7 @@ def create_coords(_, new_path):
 
 
 DEFAULT_FILES = [
-    FileSpec("electrodes", ".tsv", Path("elecs/clinical_TDT_elecs_all.mat"), copy_command=convert_electrodes),
+    FileSpec("electrodes", ".tsv", Path("elecs/TDT_elecs_all.mat"), copy_command=convert_electrodes),
     FileSpec("coordsystem", ".json", Path(""), copy_command=create_coords),
 ]
 

@@ -53,6 +53,7 @@ class DatasetImporter(BaseObject):
         dataset: Optional[Dataset] = None,
         src_root: Optional[Path] = None,
         subjects: List[str] = [],
+        process: bool = True,
         **kwargs: Any,
     ) -> None:
         """Constructs this object.
@@ -66,7 +67,8 @@ class DatasetImporter(BaseObject):
         if src_root is not None:
             self.src_root = src_root
 
-        self._process_subjects(subjects)
+        if process:
+            self._process_subjects(subjects)
         super().construct(**kwargs)
 
     def import_subjects(self, path: Path):

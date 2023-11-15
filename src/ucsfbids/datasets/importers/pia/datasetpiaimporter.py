@@ -57,7 +57,6 @@ class DatasetPiaImporter(DatasetImporter):
 
         for subject in subjects:
             if subject not in self.dataset.subjects:
-                print(subject)
                 self.dataset.create_new_subject(Subject, subject)
             self.dataset.subjects[subject].add_importer("Pia", SubjectPiaImporter)
 
@@ -66,6 +65,7 @@ class DatasetPiaImporter(DatasetImporter):
         dataset: Optional[Dataset] = None,
         src_root: Optional[Path] = None,
         subjects: List[str] = [],
+        process: bool = True,
         **kwargs: Any,
     ) -> None:
         if dataset is not None:
@@ -74,9 +74,9 @@ class DatasetPiaImporter(DatasetImporter):
         if src_root is not None:
             self.src_root = src_root
 
-        print(subjects)
-        self._process_subjects(subjects)
-        super().construct(**kwargs)
+        if process:
+            self._process_subjects(subjects)
+        super().construct(process=False, **kwargs)
 
     def import_subjects(self, path: Path, overwrite: bool = False):
         assert self.dataset is not None
@@ -91,7 +91,11 @@ class DatasetPiaImporter(DatasetImporter):
             if subject in participants_tsv_data["participant_id"].values and not overwrite:
                 continue
             subject.create_importer("Pia", self.src_root).execute_import(path)
-            participants_tsv_data.append({"participant_id": subject}, ignore_index=True)
+            subject_frame = pd.DataFrame(data=[subject.name], columns=["participant_id"])
+            participants_tsv_data = pd.concat(
+                [participants_tsv_data, subject_frame],
+                ignore_index=True,
+            )
 
         participants_tsv_data.to_csv(participants_tsv_path, sep="\t")
 
@@ -107,7 +111,8 @@ class DatasetPiaImporter(DatasetImporter):
         if name is None:
             name = self.dataset.name
         if path is None:
-            path = self.dataset.path
+            assert self.dataset.path is not None
+            path = self.dataset.path.parent
         assert path is not None
         assert name is not None
 

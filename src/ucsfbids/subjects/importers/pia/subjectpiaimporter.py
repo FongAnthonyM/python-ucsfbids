@@ -26,6 +26,7 @@ class SubjectPiaImporter(SubjectImporter):
         subject: Subject | None = None,
         src_root: Path | None = None,
         sessions: list[SessionSpec] = [],
+        process=True,
         **kwargs: Any,
     ) -> None:
         if subject is not None:
@@ -36,8 +37,10 @@ class SubjectPiaImporter(SubjectImporter):
 
         sessions.extend(PIA_SESSIONS)
 
-        self._process_sessions(sessions)
-        super().construct(**kwargs)
+        if process:
+            self._process_sessions(sessions)
+
+        super().construct(process=False, **kwargs)
 
     def import_sessions(
         self,
@@ -48,11 +51,7 @@ class SubjectPiaImporter(SubjectImporter):
         for session in self.subject.sessions.values():
             session.create_importer("Pia", self.src_root).execute_import(path, session.name)
 
-    def execute_import(
-        self,
-        path: Path,
-        name: Optional[str],
-    ) -> None:
+    def execute_import(self, path: Path, name: Optional[str] = None) -> None:
         assert self.subject is not None
         if name is None:
             name = self.subject.name

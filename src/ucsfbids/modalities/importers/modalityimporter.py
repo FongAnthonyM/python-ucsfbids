@@ -90,12 +90,14 @@ class ModalityImporter(BaseObject):
         if file.copy_command is None:
             shutil.copy(old_path, new_path)
         elif isinstance(file.copy_command, str):
-            subprocess.run(f"{file.copy_command} {old_path} {new_path}")
+            # subprocess.run(f"{file.copy_command} {old_path} {new_path}")
+            subprocess.run([file.copy_command, old_path, new_path])
         elif callable(file.copy_command):
             file.copy_command(old_path, new_path)
 
         if file.post_command is not None:
-            subprocess.run(f"{file.post_command} {new_path}")
+            # subprocess.run(f"{file.post_command} {new_path}")
+            subprocess.run([file.post_command, new_path])
 
     def import_all_files(self, path: Path) -> None:
         assert self.modality is not None
