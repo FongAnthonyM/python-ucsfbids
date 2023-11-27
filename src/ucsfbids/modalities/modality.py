@@ -255,8 +255,8 @@ class Modality(CachingObject, BaseComposite, DispatchableClass):
         self.create_meta_info()
 
     def create_importer(self, type_):
-        return self.importers[type_](session=self)
+        return self.importers[type_](modality=self)
 
     def create_exporter(self, type_: str) -> Any:
-        return self.exporters[type_](subject=self)
+        return self.exporters[type_](modality=self)
 

@@ -206,7 +206,7 @@ class Subject(BaseComposite):
         return new_session
 
     def create_importer(self, type_):
-        return self.importers[type_](session=self)
+        return self.importers[type_](subject=self)
 
     def create_exporter(self, type_: str) -> Any:
         return self.exporters[type_](subject=self)
