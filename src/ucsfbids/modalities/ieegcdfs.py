@@ -11,19 +11,21 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
+from pathlib import Path
+from typing import Any
+
 # Imports #
 # Standard Libraries #
 from baseobjects import BaseComposite
 from baseobjects.cachingtools import CachingObject, timed_keyless_cache
-from pathlib import Path
-from typing import Any
 
 # Third-Party Packages #
 from cdfs import CDFS
 
+from .exporters import IEEGBIDSExporter
+
 # Local Packages #
 from .ieeg import IEEG
-from .exporters import IEEGBIDSExporter
 
 
 # Definitions #
@@ -57,6 +59,7 @@ class IEEGCDFS(IEEG):
         init: Determines if this object will construct.
         kwargs: The keyword arguments for inheritance.
     """
+
     default_meta_info: dict[str, Any] = IEEG.default_meta_info.copy()
     default_exporters: dict[str, type] = {"BIDS": IEEGBIDSExporter}
     cdfs_type: type[CDFS] = CDFS
@@ -68,7 +71,7 @@ class IEEGCDFS(IEEG):
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
-        mode: str = 'r',
+        mode: str = "r",
         create: bool = False,
         *,
         init: bool = True,

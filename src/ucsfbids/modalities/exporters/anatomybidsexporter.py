@@ -20,7 +20,7 @@ from typing import Any
 # Third-Party Packages #
 
 # Local Packages #
-from .modatilybidsexporter import ModalityBIDSExporter
+from .modalitybidsexporter import ModalityBIDSExporter
 
 
 # Definitions #

@@ -11,20 +11,23 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
+from pathlib import Path
+from typing import Any
+
+import pandas as pd
+
 # Imports #
 # Standard Libraries #
 from baseobjects import BaseComposite
 from baseobjects.cachingtools import CachingObject, timed_keyless_cache
-from pathlib import Path
-from typing import Any
 
 # Third-Party Packages #
 from cdfs import CDFS
-import pandas as pd
+
+from .exporters import IEEGBIDSExporter
 
 # Local Packages #
 from .modality import Modality
-from .exporters import IEEGBIDSExporter
 
 
 # Definitions #
@@ -58,9 +61,11 @@ class IEEG(Modality):
         init: Determines if this object will construct.
         kwargs: The keyword arguments for inheritance.
     """
+
     default_meta_info: dict[str, Any] = Modality.default_meta_info.copy()
     default_name: str = "ieeg"
     default_exporters: dict[str, type] = {"BIDS": IEEGBIDSExporter}
+    default_importers: dict[str, type] = {}
 
     # Magic Methods #
     # Construction/Destruction
@@ -69,7 +74,7 @@ class IEEG(Modality):
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
-        mode: str = 'r',
+        mode: str = "r",
         create: bool = False,
         *,
         init: bool = True,
@@ -103,7 +108,7 @@ class IEEG(Modality):
         Returns:
             The electrode information.
         """
-        return pd.read_csv(self.electrodes_path, sep='\t')
+        return pd.read_csv(self.electrodes_path, sep="\t")
 
     def create(self) -> None:
         """Creates and sets up the anat directory."""

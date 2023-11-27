@@ -2,7 +2,7 @@
 
 """
 # Package Header #
-from ucsfbids.header import *
+from ucsfbids.header import __author__, __credits__, __maintainer__, __email__
 
 # Header #
 __author__ = __author__
@@ -20,23 +20,23 @@ from typing import Any
 # Third-Party Packages #
 
 # Local Packages #
-from ..subject import Subject
+from ..dataset import Dataset
 
 
 # Definitions #
 # Classes #
-class SubjectBIDSExporter(BaseObject):
+class DatasetBIDSExporter(BaseObject):
     # Magic Methods #
     # Construction/Destruction
     def __init__(
         self,
-        subject: Subject | None = None,
+        dataset: Dataset | None = None,
         *,
         init: bool = True,
         **kwargs: Any,
     ) -> None:
         # New Attributes #
-        self.subject: Subject | None = None
+        self.dataset: Dataset | None = None
 
         # Parent Attributes #
         super().__init__(init=False)
@@ -44,7 +44,7 @@ class SubjectBIDSExporter(BaseObject):
         # Object Construction #
         if init:
             self.construct(
-                subject=subject,
+                dataset=dataset,
                 **kwargs,
             )
 
@@ -52,7 +52,7 @@ class SubjectBIDSExporter(BaseObject):
     # Constructors/Destructors
     def construct(
         self,
-        subject: Subject | None = None,
+        dataset: Dataset | None = None,
         **kwargs: Any,
     ) -> None:
         """Constructs this object.
@@ -60,20 +60,22 @@ class SubjectBIDSExporter(BaseObject):
         Args:
             kwargs: The keyword arguments for inheritance if any.
         """
-        if subject is not None:
-            self.subject = subject
+        if dataset is not None:
+            self.dataset = dataset
 
         super().construct(**kwargs)
 
-    def export_sessions(self, path: Path):
-        for session in self.subject.sessions.values():
-            session.create_exporter("BIDS").execute_export(path)
+    def export_subjects(self, path: Path):
+        if self.dataset is None:
+            raise RuntimeError("Undefined Dataset")
+        for subject in self.dataset.subjects.values():
+            subject.create_exporter("BIDS").execute_export(path)
 
     def execute_export(self, path: Path, name: str) -> None:
         new_path = path / f"sub-{name}"
         new_path.mkdir(exist_ok=True)
-        self.export_sessions(path=new_path)
+        self.export_subjects(path=new_path)
 
 
 # Assign Exporter
-Subject.default_exporters["BIDS"] = SubjectBIDSExporter
+Dataset.default_exporters["BIDS"] = DatasetBIDSExporter

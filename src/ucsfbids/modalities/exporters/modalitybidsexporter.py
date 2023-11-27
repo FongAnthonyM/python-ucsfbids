@@ -90,7 +90,7 @@ class ModalityBIDSExporter(BaseObject):
                     if not new_path.exists():
                         shutil.copy(old_path, path / old_name.replace(self.modality.full_name, name))
 
-    def export(self, path: Path, name: str) -> None:
+    def execute_export(self, path: Path, name: str) -> None:
         new_path = path / f"{self.modality.name}"
         new_path.mkdir(exist_ok=True)
         self.export_all_files(path=new_path, name=name)

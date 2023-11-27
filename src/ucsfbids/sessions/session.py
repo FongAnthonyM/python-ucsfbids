@@ -17,11 +17,12 @@ import json
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
+
 # Third-Party Packages #
 from baseobjects import BaseComposite
-from baseobjects.cachingtools import CachingObject, timed_keyless_cache
-from baseobjects.objects import DispatchableClass
-import pandas as pd
+from baseobjects.cachingtools.cachingobject import CachingObject
+from baseobjects.objects.dispatchableclass import DispatchableClass
 
 # Local Packages #
 from ..modalities import Modality
@@ -63,7 +64,7 @@ class Session(CachingObject, DispatchableClass):
         "SessionNamespace": "",
         "SessionType": "",
     }
-    default_modalities: dict[str, type[Modality]] = {}
+    default_modalities: dict[str, Any] = {}
     default_importers: dict[str, type] = {}
     default_exporters: dict[str, type] = {}
 
@@ -102,7 +103,7 @@ class Session(CachingObject, DispatchableClass):
             The namespace and name of the class.
         """
         if path is not None:
-            if not isinstance(parent_path, Path):
+            if not isinstance(path, Path):  # NOTE: path was parent_path on this line
                 path = Path(path)
 
             if name is None:
@@ -115,9 +116,11 @@ class Session(CachingObject, DispatchableClass):
         parent_name = path.parts[-2][4:]
 
         meta_info_path = path / f"sub-{parent_name}_ses-{name}_meta.json"
-        with meta_info_path.open("r") as file:
-            info = json.load(file)
-
+        if not meta_info_path.exists():
+            info = cls.default_meta_info
+        else:
+            with meta_info_path.open("r") as file:
+                info = json.load(file)
         return info["SessionNamespace"], info["SessionType"]
 
     # Magic Methods #
@@ -127,7 +130,7 @@ class Session(CachingObject, DispatchableClass):
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
-        mode: str = 'r',
+        mode: str = "r",
         create: bool = False,
         load: bool = True,
         *,
@@ -143,7 +146,7 @@ class Session(CachingObject, DispatchableClass):
         self.parent_name: str | None = None
 
         self.meta_info: dict = self.default_meta_info.copy()
-        self.modalities: dict[str, Modality] = {}
+        self.modalities: dict[str, Any] = {}
 
         self.importers: dict[str, type] = self.default_importers.copy()
         self.exporters: dict[str, type] = self.default_exporters.copy()
@@ -164,9 +167,9 @@ class Session(CachingObject, DispatchableClass):
             )
 
     @property
-    def path(self) -> Path:
+    def path(self) -> Path | None:
         """The path to the session."""
-        return self._path
+        return self._path  # WARN: path can be none
 
     @path.setter
     def path(self, value: str | Path) -> None:
@@ -183,6 +186,7 @@ class Session(CachingObject, DispatchableClass):
     @property
     def meta_info_path(self) -> Path:
         """The path to the meta information json file."""
+        assert self._path is not None
         return self._path / f"{self.full_name}_meta.json"
 
     # Instance Methods #
@@ -219,9 +223,10 @@ class Session(CachingObject, DispatchableClass):
         elif parent_path is not None and self.name is not None:
             self.path = (parent_path if isinstance(parent_path, Path) else Path(parent_path)) / f"ses-{self.name}"
 
-        if self.path is not None:
-            self.parent_name = self.path.parts[-2][4:]
-            
+        assert self.path is not None
+        # if self.path is not None:
+        self.parent_name = self.path.parts[-2][4:]
+
         if mode is not None:
             self._mode = mode
 
@@ -262,12 +267,13 @@ class Session(CachingObject, DispatchableClass):
             self.modalities[name] = modality_type(parent_path=self.path, mode=self._mode)
 
     def create_modalities(self) -> None:
-        for name, modality in self.modalities.items():
+        for modality in self.modalities.values():
             modality.create()
 
     def create(self) -> None:
         """Creates all contents of the session."""
-        self.path.mkdir(exist_ok=True)
+        if self.path is not None:
+            self.path.mkdir(exist_ok=True)
         self.create_meta_info()
         self.create_modalities()
 
@@ -279,8 +285,12 @@ class Session(CachingObject, DispatchableClass):
             {m.name: m for p in self.path.iterdir() if p.is_dir() and (m := Modality(path=p, mode=mode)) is not None},
         )
 
-    def create_importer(self, type_):
-        return self.importers[type_](session=self)
+    def create_importer(self, type_: str, src_root: Path | None, **kwargs) -> Any:
+        return self.importers[type_](session=self, src_root=src_root, **kwargs)
 
     def create_exporter(self, type_):
         return self.exporters[type_](session=self)
+
+    def add_importer(self, type_: str, importer: type, overwrite: bool = False):
+        if type_ not in self.importers or overwrite:
+            self.importers[type_] = importer

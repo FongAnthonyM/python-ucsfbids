@@ -11,19 +11,21 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
+from pathlib import Path
+from typing import Any
+
 # Imports #
 # Standard Libraries #
 from baseobjects import BaseComposite
 from baseobjects.cachingtools import CachingObject, timed_keyless_cache
-from pathlib import Path
-from typing import Any
 
 # Third-Party Packages #
 from cdfs import CDFS
 
+from .exporters import AnatomyBIDSExporter
+
 # Local Packages #
 from .modality import Modality
-from .exporters import AnatomyBIDSExporter
 
 
 # Definitions #
@@ -57,9 +59,11 @@ class Anatomy(Modality):
         init: Determines if this object will construct.
         kwargs: The keyword arguments for inheritance.
     """
+
     default_meta_info: dict[str, Any] = Modality.default_meta_info.copy()
     default_name: str = "anat"
     default_exporters: dict[str, type] = {"BIDS": AnatomyBIDSExporter}
+    default_importers: dict[str, type] = {}
 
     # Magic Methods #
     # Construction/Destruction
@@ -68,7 +72,7 @@ class Anatomy(Modality):
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
-        mode: str = 'r',
+        mode: str = "r",
         create: bool = False,
         *,
         init: bool = True,

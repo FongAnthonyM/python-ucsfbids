@@ -58,6 +58,7 @@ class CDFSSession(Session):
         init: Determines if this object will construct.
         kwargs: The keyword arguments for inheritance.
     """
+
     default_meta_info: dict[str, Any] = Session.default_meta_info.copy()
     default_modalities: dict[str, type[Modality]] = {"anat": Anatomy, "ct": CT, "ieeg": IEEGCDFS}
     default_exporters: dict[str, type] = {"BIDS": SessionBIDSExporter}

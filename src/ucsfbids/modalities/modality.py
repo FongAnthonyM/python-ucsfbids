@@ -17,11 +17,12 @@ import json
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
+
 # Third-Party Packages #
 from baseobjects import BaseComposite
-from baseobjects.cachingtools import CachingObject, timed_keyless_cache
-from baseobjects.objects import DispatchableClass
-import pandas as pd
+from baseobjects.cachingtools.cachingobject import CachingObject
+from baseobjects.objects.dispatchableclass import DispatchableClass
 
 # Local Packages #
 
@@ -127,7 +128,7 @@ class Modality(CachingObject, BaseComposite, DispatchableClass):
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
-        mode: str = 'r',
+        mode: str = "r",
         create: bool = False,
         *,
         init: bool = True,
@@ -219,7 +220,7 @@ class Modality(CachingObject, BaseComposite, DispatchableClass):
         if self.path is not None:
             self.subject_name = self.path.parts[-3][4:]
             self.session_name = self.path.parts[-2][4:]
-            
+
         if mode is not None:
             self._mode = mode
 
@@ -254,9 +255,13 @@ class Modality(CachingObject, BaseComposite, DispatchableClass):
         self.path.mkdir(exist_ok=True)
         self.create_meta_info()
 
-    def create_importer(self, type_):
-        return self.importers[type_](modality=self)
+    def create_importer(self, type_: str, src_root: Path | None, **kwargs) -> Any:
+        return self.importers[type_](modality=self, src_root=src_root, **kwargs)
+
 
     def create_exporter(self, type_: str) -> Any:
         return self.exporters[type_](modality=self)
 
+    def add_importer(self, type_: str, importer: type, overwrite: bool = False):
+        if type_ not in self.importers or overwrite:
+            self.importers[type_] = importer
