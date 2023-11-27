@@ -258,6 +258,7 @@ class Subject(BaseComposite):
         mode: str | None = None,
         load: bool = False,
         create: bool = True,
+        load: bool = False,
         **kwargs: Any,
     ) -> Session:
         """Create a new session for this subject with a given session type and arguments.
@@ -267,6 +268,7 @@ class Subject(BaseComposite):
             name: The name of the new session, defaults to the latest generated name.
             mode: The file mode to set the session to, defaults to the subject's mode.
             create: Determines if the session will create its contents.
+            load: Determines if the sessions will be loaded from the subject's directory.
             **kwargs: The keyword arguments for the session.
 
         Returns:
@@ -284,6 +286,7 @@ class Subject(BaseComposite):
             mode=mode,
             load=load,
             create=create,
+            load=load,
             **kwargs,
         )
         return new_session
