@@ -76,13 +76,13 @@ class SubjectImporter(BaseObject):
 
         super().construct(process=False, **kwargs)
 
-    def import_sessions(self, path: Path):
+    def import_sessions(self, path: Path, source_patient: str):
         assert self.subject is not None
 
         for session in self.subject.sessions.values():
-            session.create_importer("BIDS", self.src_root).execute_import(path)
+            session.create_importer("BIDS", self.src_root).execute_import(path, source_patient)
 
-    def execute_import(self, path: Path, name: Optional[str] = None) -> None:
+    def execute_import(self, path: Path, source_patient: str, name: Optional[str] = None) -> None:
         assert self.subject is not None
         if name is None:
             name = self.subject.name
@@ -90,7 +90,7 @@ class SubjectImporter(BaseObject):
 
         new_path = path / f"sub-{name}"
         new_path.mkdir(exist_ok=True)
-        self.import_sessions(path=new_path)
+        self.import_sessions(path=new_path, source_patient=source_patient)
 
 
 Subject.default_importers["BIDS"] = SubjectImporter

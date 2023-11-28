@@ -78,7 +78,7 @@ class DatasetPiaImporter(DatasetImporter):
             self._process_subjects(subjects)
         super().construct(process=False, **kwargs)
 
-    def import_subjects(self, path: Path, overwrite: bool = False):
+    def import_subjects(self, path: Path, source_patients: list[str], overwrite: bool = False):
         assert self.dataset is not None
 
         participants_tsv_path = path / "participants.tsv"
@@ -87,10 +87,10 @@ class DatasetPiaImporter(DatasetImporter):
         else:
             participants_tsv_data = pd.DataFrame(columns=["participant_id"])
 
-        for subject in self.dataset.subjects.values():
+        for subject, source_patient in zip(self.dataset.subjects.values(), source_patients):
             if subject in participants_tsv_data["participant_id"].values and not overwrite:
                 continue
-            subject.create_importer("Pia", self.src_root).execute_import(path)
+            subject.create_importer("Pia", self.src_root).execute_import(path, source_patient)
             subject_frame = pd.DataFrame(data=[subject.name], columns=["participant_id"])
             participants_tsv_data = pd.concat(
                 [participants_tsv_data, subject_frame],
@@ -102,6 +102,7 @@ class DatasetPiaImporter(DatasetImporter):
     def execute_import(
         self,
         path: Optional[Path] = None,
+        source_patients: list[str] = [],
         name: Optional[str] = None,
         desc: dict = DEFAULT_DESC,
         ignore_entries: list[str] = ["ct\n"],
@@ -127,4 +128,4 @@ class DatasetPiaImporter(DatasetImporter):
         _update_ignore(ignore_path, ignore_entries)
         _update_json(participants_json_path, participants_json_data)
 
-        self.import_subjects(path=new_path)
+        self.import_subjects(path=new_path, source_patients=source_patients)

@@ -71,13 +71,13 @@ class DatasetImporter(BaseObject):
             self._process_subjects(subjects)
         super().construct(**kwargs)
 
-    def import_subjects(self, path: Path):
+    def import_subjects(self, path: Path, source_patients: list[str]):
         assert self.dataset is not None
 
-        for subject in self.dataset.subjects.values():
-            subject.create_importer("BIDS", self.src_root).execute_import(path)
+        for subject, source_patient in zip(self.dataset.subjects.values(), source_patients):
+            subject.create_importer("BIDS", self.src_root).execute_import(path, source_patient)
 
-    def execute_import(self, path: Path, name: Optional[str]) -> None:
+    def execute_import(self, path: Path, source_patients: list[str], name: Optional[str]) -> None:
         assert self.dataset is not None
         if name is None:
             name = self.dataset.name
@@ -85,7 +85,7 @@ class DatasetImporter(BaseObject):
 
         new_path = path / f"sub-{name}"
         new_path.mkdir(exist_ok=True)
-        self.import_subjects(path=new_path)
+        self.import_subjects(path=new_path, source_patients=source_patients)
 
 
 Dataset.default_importers["BIDS"] = DatasetImporter

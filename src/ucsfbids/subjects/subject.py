@@ -298,3 +298,7 @@ class Subject(BaseComposite):
     def add_importer(self, type_: str, importer: type, overwrite: bool = False):
         if type_ not in self.importers or overwrite:
             self.importers[type_] = importer
+
+    def add_exporter(self, type_: str, exporter: type, overwrite: bool = False):
+        if type_ not in self.exporters or overwrite:
+            self.exporters[type_] = exporter

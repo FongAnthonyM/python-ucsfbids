@@ -99,62 +99,62 @@ class ModalityImporter(BaseObject):
             # subprocess.run(f"{file.post_command} {new_path}")
             subprocess.run([file.post_command, new_path])
 
-    def import_all_files(self, path: Path) -> None:
+    def import_all_files(self, path: Path, source_name: str) -> None:
         assert self.modality is not None
         assert self.src_root is not None
-        subject_name = self.modality.subject_name
-        assert subject_name is not None
 
         for file in self.files:
-            old_path = self.src_root / subject_name / file.path_from_root
-            old_name = old_path.name
-            exclude = any(n in old_name for n in self.import_exclude_names)
-            new_path = path / f"{self.modality.full_name}_{file.suffix}{file.extension}"
+            for path in file.path_from_root:
+                old_path = self.src_root / source_name / path
+                old_name = old_path.name
+                exclude = any(n in old_name for n in self.import_exclude_names)
+                new_path = path / f"{self.modality.full_name}_{file.suffix}{file.extension}"
 
-            if not old_path.is_file():
-                continue
+                if not old_path.is_file():
+                    continue
 
-            if exclude:
-                continue
+                if exclude:
+                    continue
 
-            if new_path.exists():
-                continue
+                if new_path.exists():
+                    continue
 
-            self._import_file(file, old_path, new_path)
+                self._import_file(file, old_path, new_path)
+                break
 
-    def import_select_files(self, path: Path) -> None:
+    def import_select_files(self, path: Path, source_name: str) -> None:
         assert self.modality is not None
         assert self.src_root is not None
-        subject_name = self.modality.subject_name
-        assert subject_name is not None
 
         for file in self.files:
-            old_path = self.src_root / subject_name / file.path_from_root
-            old_name = old_path.name
-            include = any(n in old_name for n in self.import_file_names)
-            exclude = any(n in old_name for n in self.import_exclude_names)
-            new_path = path / f"{self.modality.full_name}_{file.suffix}{file.extension}"
+            for path in file.path_from_root:
+                old_path = self.src_root / source_name / path
+                old_name = old_path.name
+                include = any(n in old_name for n in self.import_file_names)
+                exclude = any(n in old_name for n in self.import_exclude_names)
+                new_path = path / f"{self.modality.full_name}_{file.suffix}{file.extension}"
 
-            if not old_path.is_file():
-                continue
+                if not old_path.is_file():
+                    continue
 
-            if exclude:
-                continue
+                if exclude:
+                    continue
 
-            if not include:
-                continue
+                if not include:
+                    continue
 
-            if new_path.exists():
-                continue
+                if new_path.exists():
+                    continue
 
-            self._import_file(file, old_path, new_path)
+                self._import_file(file, old_path, new_path)
+                break
 
-    def execute_import(self, path: Path) -> None:
+    def execute_import(self, path: Path, source_name: str) -> None:
         assert self.modality is not None
 
         new_path = path / f"{self.modality.name}"
         new_path.mkdir(exist_ok=True)
-        self.import_all_files(path=new_path)
+        self.import_all_files(path=new_path, source_name=source_name)
 
 
 # Assign Exporter
