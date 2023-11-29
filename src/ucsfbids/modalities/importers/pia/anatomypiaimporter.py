@@ -85,7 +85,6 @@ class AnatomyPiaImporter(AnatomyImporter):
                     continue
 
                 file.copy_command(imaging_path, new_path)
-                break
 
             if not callable(file.copy_command) and not new_path.exists():
                 print(new_path)

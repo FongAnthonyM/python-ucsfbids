@@ -84,7 +84,10 @@ class CTPiaImporter(CTImporter):
                     continue
 
                 file.copy_command(imaging_path, new_path)
-                break
+
+            if not callable(file.copy_command) and not new_path.exists():
+                print(new_path)
+                raise RuntimeError("No source file but no function provided to gather data")
 
 
 CT.default_importers["Pia"] = CTPiaImporter
