@@ -62,10 +62,10 @@ class CTPiaImporter(CTImporter):
         assert self.src_root is not None
 
         for file in self.files:
-            for path in file.path_from_root:
-                imaging_root = self.src_root / "data_store2/imaging/subjects"
-                imaging_path = imaging_root / source_name / path
-                new_path = path / f"{self.modality.full_name}_{file.suffix}{file.extension}"
+            imaging_root = self.src_root / "data_store2/imaging/subjects"
+            new_path = path / f"{self.modality.full_name}_{file.suffix}{file.extension}"
+            for filepath in file.path_from_root:
+                imaging_path = imaging_root / source_name / filepath
                 old_name = imaging_path.name
                 exclude = any(n in old_name for n in self.import_exclude_names)
 

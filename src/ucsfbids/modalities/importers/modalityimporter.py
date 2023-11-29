@@ -104,11 +104,11 @@ class ModalityImporter(BaseObject):
         assert self.src_root is not None
 
         for file in self.files:
-            for path in file.path_from_root:
-                old_path = self.src_root / source_name / path
+            new_path = path / f"{self.modality.full_name}_{file.suffix}{file.extension}"
+            for filepath in file.path_from_root:
+                old_path = self.src_root / source_name / filepath
                 old_name = old_path.name
                 exclude = any(n in old_name for n in self.import_exclude_names)
-                new_path = path / f"{self.modality.full_name}_{file.suffix}{file.extension}"
 
                 if not old_path.is_file():
                     continue
@@ -127,12 +127,12 @@ class ModalityImporter(BaseObject):
         assert self.src_root is not None
 
         for file in self.files:
-            for path in file.path_from_root:
-                old_path = self.src_root / source_name / path
+            new_path = path / f"{self.modality.full_name}_{file.suffix}{file.extension}"
+            for filepath in file.path_from_root:
+                old_path = self.src_root / source_name / filepath
                 old_name = old_path.name
                 include = any(n in old_name for n in self.import_file_names)
                 exclude = any(n in old_name for n in self.import_exclude_names)
-                new_path = path / f"{self.modality.full_name}_{file.suffix}{file.extension}"
 
                 if not old_path.is_file():
                     continue

@@ -2279,7 +2279,7 @@ hdf5objects = ">=0.3.0"
 type = "git"
 url = "git@github.com:FongAnthonyM/python-xltektools.git"
 reference = "v0.3.0"
-resolved_reference = "64628d90b36ecf83de163ee589d464710f21084a"
+resolved_reference = "eabc0e28de49cd6131bdb2c823b21183cac09da0"
 
 [metadata]
 lock-version = "2.0"
