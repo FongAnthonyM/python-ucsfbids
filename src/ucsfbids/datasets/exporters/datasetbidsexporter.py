@@ -67,19 +67,21 @@ class DatasetBIDSExporter(BaseObject):
 
         super().construct(**kwargs)
 
-    def export_subjects(self, path: Path):
+    def export_subjects(self, path: Path, sub_name_map: dict[str, str]):
         assert self.dataset is not None
         for subject in self.dataset.subjects.values():
-            subject.create_exporter("BIDS").execute_export(path)
+            assert subject.name is not None
+            new_name = sub_name_map[subject.name]
+            subject.create_exporter("BIDS").execute_export(path, new_name)
 
-    def execute_export(self, path: Path, name: str) -> None:
+    def execute_export(self, path: Path, name: str, sub_name_map: dict[str, str]) -> None:
         new_path = path / name
         new_path.mkdir(exist_ok=True)
         assert self.dataset is not None
         assert self.dataset.path is not None
         for file in [f for f in self.dataset.path.iterdir() if f.is_file()]:
             shutil.copy2(file, new_path / file.name)
-        self.export_subjects(path=new_path)
+        self.export_subjects(path=new_path, sub_name_map=sub_name_map)
 
 
 # Assign Exporter
