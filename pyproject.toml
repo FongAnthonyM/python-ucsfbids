@@ -23,8 +23,8 @@ python = ">=3.10, <4.0"
 click = ">=8.0.3"
 tomli = ">=2.0.1"
 baseobjects = ">=1.10.0"
-hdf5objects = ">=0.4.3
-cdfs = {git = "git@github.com:FongAnthonyM/python-cdfs.git", rev = "v0.2.0", develop = true}
+hdf5objects = ">=0.4.3"
+cdfs = ">=0.2.0"
 pyedflib = ">=0.1.36"
 
 [tool.poetry.dev-dependencies]
