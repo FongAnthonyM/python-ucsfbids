@@ -256,7 +256,6 @@ class Subject(BaseComposite):
         session: type,
         name: str | None = None,
         mode: str | None = None,
-        load: bool = False,
         create: bool = True,
         load: bool = False,
         **kwargs: Any,
@@ -284,7 +283,6 @@ class Subject(BaseComposite):
             name=name,
             parent_path=self.path,
             mode=mode,
-            load=load,
             create=create,
             load=load,
             **kwargs,
@@ -300,3 +298,7 @@ class Subject(BaseComposite):
     def add_importer(self, type_: str, importer: type, overwrite: bool = False):
         if type_ not in self.importers or overwrite:
             self.importers[type_] = importer
+
+    def add_exporter(self, type_: str, exporter: type, overwrite: bool = False):
+        if type_ not in self.exporters or overwrite:
+            self.exporters[type_] = exporter

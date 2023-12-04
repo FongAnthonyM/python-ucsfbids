@@ -34,10 +34,8 @@ def strip_json(old_path, new_path):
 
 TO_STRIP = ["InstitutionName", "InstitutionalDepartmentName", "InstitutionAddress", "DeviceSerialNumber"]
 DEFAULT_FILES = [
-    FileSpec("CT", ".nii", Path("CT/CT.nii")),
-    FileSpec("CT", ".nii.gz", Path("CT/CT.nii.gz")),
-    FileSpec("CT", ".json", Path("CT/CT_orig.json"), copy_command=strip_json),
-    FileSpec("CT", ".json", Path("CT/CT.json"), copy_command=strip_json),
+    FileSpec("CT", ".nii", [Path("CT/CT.nii"), Path("CT/CT.nii.gz")]),
+    FileSpec("CT", ".json", [Path("CT/CT_orig.json"), Path("CT/CT.json")], copy_command=strip_json),
 ]
 
 
@@ -59,34 +57,37 @@ class CTPiaImporter(CTImporter):
         self.files = files
         super().construct(**kwargs)
 
-    def import_all_files(self, path: Path) -> None:
+    def import_all_files(self, path: Path, source_name: str) -> None:
         assert self.modality is not None
-        assert self.modality.subject_name is not None
         assert self.src_root is not None
 
         for file in self.files:
-            subject_name = self.modality.subject_name
             imaging_root = self.src_root / "data_store2/imaging/subjects"
-            imaging_path = imaging_root / subject_name / file.path_from_root
             new_path = path / f"{self.modality.full_name}_{file.suffix}{file.extension}"
-            old_name = imaging_path.name
-            exclude = any(n in old_name for n in self.import_exclude_names)
+            for filepath in file.path_from_root:
+                imaging_path = imaging_root / source_name / filepath
+                old_name = imaging_path.name
+                exclude = any(n in old_name for n in self.import_exclude_names)
 
-            if new_path.exists():
-                continue
+                if new_path.exists():
+                    continue
 
-            if exclude:
-                continue
+                if exclude:
+                    continue
 
-            if imaging_path.is_file():
-                self._import_file(file, imaging_path, new_path)
-                continue
+                if imaging_path.is_file():
+                    self._import_file(file, imaging_path, new_path)
+                    continue
 
-            if not callable(file.copy_command):
-                print(f"No source file for {imaging_path}, skipping...")
-                continue
+                if not callable(file.copy_command):
+                    print(f"No source file for {imaging_path}, skipping...")
+                    continue
 
-            file.copy_command(imaging_path, new_path)
+                file.copy_command(imaging_path, new_path)
+
+            if not callable(file.copy_command) and not new_path.exists():
+                print(new_path)
+                raise RuntimeError("No source file but no function provided to gather data")
 
 
 CT.default_importers["Pia"] = CTPiaImporter

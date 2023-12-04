@@ -19,48 +19,44 @@ classifiers = [
 Changelog = "https://github.com/fongant/python-ucsfbids/releases"
 
 [tool.poetry.dependencies]
-python = "^3.10"
-click = "^8.0.3"
-tomli = "^2.0.1"
-baseobjects = {git = "git@github.com:FongAnthonyM/python-baseobjects.git", rev = "v1.10.0", develop = true}
-classversioning = {git = "git@github.com:FongAnthonyM/python-classversioning.git", rev = "v0.7.0", develop = true}
-dspobjects = {git = "git@github.com:FongAnthonyM/python-dspobjects.git", rev = "v0.3.0", develop = true}
-proxyarrays = {git = "git@github.com:FongAnthonyM/python-proxyarrays.git", rev = "v0.5.1", develop = true}
-hdf5objects = {git = "git@github.com:FongAnthonyM/python-hdf5objects.git", rev = "v0.4.3-additional_channel_level_axes_maps", develop = true}
-cdfs = {git = "git@github.com:FongAnthonyM/python-cdfs.git", rev = "v0.2.0", develop = true}
-taskblocks = {git = "git@github.com:FongAnthonyM/python-taskblocks.git", rev = "v0.1.2", develop = true}
-xltektools = {git = "git@github.com:FongAnthonyM/python-xltektools.git", rev = "v0.3.0", develop = true}
+python = ">=3.10, <4.0"
+click = ">=8.0.3"
+tomli = ">=2.0.1"
+baseobjects = ">=1.10.0"
+hdf5objects = ">=0.4.3"
+cdfs = ">=0.2.0"
+pyedflib = ">=0.1.36"
 
 [tool.poetry.dev-dependencies]
-pytest = "^7.0.1"
-safety = "^1.10.3"
-mypy = "^0.910"
-typeguard = "^2.13.2"
-xdoctest = {extras = ["colors"], version = "^0.15.10"}
-sphinx = "^4.4.0"
-sphinx-autobuild = "^2021.3.14"
-pre-commit = "^2.16.0"
-flake8 = "^4.0.1"
-black = "^22.1"
-flake8-bandit = "^2.1.2"
-flake8-bugbear = "^21.11.29"
-flake8-docstrings = "^1.6.0"
-flake8-rst-docstrings = "^0.2.3"
-pep8-naming = "^0.12.1"
-darglint = "^1.8.1"
-reorder-python-imports = "^2.6.0"
-pre-commit-hooks = "^4.0.1"
-sphinx-rtd-theme = "^1.0.0"
-sphinx-click = "^3.0.2"
-Pygments = "^2.10.0"
+pytest = ">=7.0.1"
+safety = ">=1.10.3"
+mypy = ">=0.910"
+typeguard = ">=2.13.2"
+xdoctest = {extras = ["colors"], version = ">=0.15.10"}
+sphinx = ">=4.4.0"
+sphinx-autobuild = ">=2021.3.14"
+pre-commit = ">=2.16.0"
+flake8 = ">=4.0.1"
+black = ">=22.1"
+flake8-bandit = ">=2.1.2"
+flake8-bugbear = ">=21.11.29"
+flake8-docstrings = ">=1.6.0"
+flake8-rst-docstrings = ">=0.2.3"
+pep8-naming = ">=0.12.1"
+darglint = ">=1.8.1"
+reorder-python-imports = ">=2.6.0"
+pre-commit-hooks = ">=4.0.1"
+sphinx-rtd-theme = ">=1.0.0"
+sphinx-click = ">=3.0.2"
+Pygments = ">=2.10.0"
 
 [tool.poetry.scripts]
 python-ucsfbids = "ucsfbids.__main__:main"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.2"
-coverage = {extras = ["toml"], version = "^7.3.2"}
-pytest-cov = "^4.1.0"
+pytest = ">=7.4.2"
+coverage = {extras = ["toml"], version = ">=7.3.2"}
+pytest-cov = ">=4.1.0"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]

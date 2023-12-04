@@ -43,12 +43,12 @@ class SessionPiaImporter(SessionImporter):
         self._process_modalities(modalities)
         super().construct(**kwargs)
 
-    def import_modalities(self, path: Path):
+    def import_modalities(self, path: Path, source_patient: str):
         assert self.session is not None
         for modality in self.session.modalities.values():
-            modality.create_importer("Pia", self.src_root).execute_import(path)
+            modality.create_importer("Pia", self.src_root).execute_import(path, source_patient)
 
-    def execute_import(self, path: Path, name: str | None = None) -> None:
+    def execute_import(self, path: Path, source_patient: str, name: str | None = None) -> None:
         assert self.session is not None
         if name is None:
             name = self.session.name
@@ -56,7 +56,7 @@ class SessionPiaImporter(SessionImporter):
 
         new_path = path / f"ses-{name}"
         new_path.mkdir(exist_ok=True)
-        self.import_modalities(path=new_path)
+        self.import_modalities(path=new_path, source_patient=source_patient)
 
 
 Session.default_importers["Pia"] = SessionPiaImporter
