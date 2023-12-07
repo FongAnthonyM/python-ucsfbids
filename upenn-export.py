@@ -12,6 +12,6 @@ name_map = {
 }
 
 if __name__ == "__main__":
-    dataset = Dataset(Path("~/pia/userdata/rchristin/test-ucsfbids-5").expanduser())
+    dataset = Dataset(Path("~/kleen-lab/pia/userdata/rchristin/ucsfbids-upenn-patients").expanduser())
     dataset.add_exporter("UPENN", DatasetUPENNExporter)
-    dataset.create_exporter("UPENN").execute_export(Path("~/Kleen-Lab/bids-mount").expanduser(), "test", name_map)
+    dataset.create_exporter("UPENN").execute_export(Path("/bids"), "staging", name_map)
