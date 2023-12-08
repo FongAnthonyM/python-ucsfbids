@@ -1,0 +1,47 @@
+/home/raphchr/kleen-lab/python/python-proxyarrays/src/proxyarrays/timeproxy/timeproxy.py:523: UserWarning: The TimeAxisProxy '<proxyarrays.timeseries.timeseriesproxy.TimeSeriesProxy object at 0x7fb84b5c0550>' does not have a valid sample period, returning maximum sample period.
+  warn(f"The TimeAxisProxy '{self}' does not have a valid sample period, returning maximum sample period.")
+Traceback (most recent call last):
+  File "/home/raphchr/kleen-lab/python/python-ucsfbids/upenn-export.py", line 22, in <module>
+    dataset.create_exporter("UPENN").execute_export(Path("/bids"), "staging", name_map)
+  File "/home/raphchr/kleen-lab/python/.envs/devel/lib/python3.10/site-packages/ucsfbids/datasets/exporters/datasetbidsexporter.py", line 84, in execute_export
+    self.export_subjects(path=new_path, sub_name_map=sub_name_map)
+  File "/home/raphchr/kleen-lab/python/.envs/devel/lib/python3.10/site-packages/ucsfbids/datasets/exporters/datasetupennexporter.py", line 14, in export_subjects
+    subject.create_exporter("UPENN").execute_export(path, new_name)
+  File "/home/raphchr/kleen-lab/python/.envs/devel/lib/python3.10/site-packages/ucsfbids/subjects/exporters/subjectbidsexporter.py", line 80, in execute_export
+    self.export_sessions(path=new_path)
+  File "/home/raphchr/kleen-lab/python/.envs/devel/lib/python3.10/site-packages/ucsfbids/subjects/exporters/subjectupennexporter.py", line 21, in export_sessions
+    session.create_exporter("UPENNImplant").execute_export(path, name="implant01")
+  File "/home/raphchr/kleen-lab/python/.envs/devel/lib/python3.10/site-packages/ucsfbids/sessions/exporters/sessionbidsexporter.py", line 79, in execute_export
+    self.export_modalities(path=new_path, name=full_name)
+  File "/home/raphchr/kleen-lab/python/.envs/devel/lib/python3.10/site-packages/ucsfbids/sessions/exporters/sessionupennimplantexporter.py", line 27, in export_modalities
+    mod.create_exporter("UPENN").execute_export(path, name=name)
+  File "/home/raphchr/kleen-lab/python/python-xltektools/src/xltektools/xltekucsfbids/modalities/exporters/ieegxltekbidsexporter.py", line 98, in execute_export
+    self.export_data(path=new_path, name=name)
+  File "/home/raphchr/kleen-lab/python/python-baseobjects/src/baseobjects/functions/callablemultiplexer.py", line 239, in __call__
+    return self._func_.__get__(self._self_(), self.__owner__)(*args, **kwargs)
+  File "/home/raphchr/kleen-lab/python/python-xltektools/src/xltektools/xltekucsfbids/modalities/exporters/ieegxltekbidsexporter.py", line 92, in export_data_as_days
+    self.cdfs_exporter.export_as_days(path=path, name=name)
+  File "/home/raphchr/kleen-lab/python/python-xltektools/src/xltektools/xltekcdfs/xltekcdfsedfexporter.py", line 244, in export_as_days
+    flat_data.insert_missing(fill_method="full", fill_kwargs={"fill_value": self.fill_value})
+  File "/home/raphchr/kleen-lab/python/python-proxyarrays/src/proxyarrays/timeproxy/timeproxy.py", line 1389, in insert_missing
+    "precise": previous_proxy.precise,
+  File "/home/raphchr/kleen-lab/python/python-proxyarrays/src/proxyarrays/timeseries/containertimeseries.py", line 134, in precise
+    return self.time_axis.precise
+  File "/home/raphchr/kleen-lab/python/python-proxyarrays/src/proxyarrays/filetimeseries/basecontainerfiletimeseries.py", line 131, in time_axis
+    return self.get_time_axis()
+  File "/home/raphchr/kleen-lab/python/python-xltektools/src/xltektools/xltekcdfs/arrays/xltekcontentsframe.py", line 98, in get_time_axis
+    return self.file["data"].components["timeseries"].time_axis
+  File "/home/raphchr/kleen-lab/python/python-xltektools/src/xltektools/xltekcdfs/arrays/xltekcontentsframe.py", line 56, in file
+    self._file = self.file_type(self._path, mode=self.mode, open_=self.remain_open, **self.file_kwargs)
+  File "/home/raphchr/kleen-lab/python/python-hdf5objects/src/hdf5objects/fileobjects/basehdf5.py", line 310, in __new__
+    version, file = cls.get_version_from_file(args[0] if args else kwargs.pop(cls._dispatch_kwarg))
+  File "/home/raphchr/kleen-lab/python/python-xltektools/src/xltektools/xltekhdf5/xltekhdf5.py", line 283, in get_version_from_file
+    file = h5py.File(file)
+  File "/home/raphchr/kleen-lab/python/.envs/devel/lib/python3.10/site-packages/h5py/_hl/files.py", line 562, in __init__
+    fid = make_fid(name, mode, userblock_size, fapl, fcpl, swmr=swmr)
+  File "/home/raphchr/kleen-lab/python/.envs/devel/lib/python3.10/site-packages/h5py/_hl/files.py", line 235, in make_fid
+    fid = h5f.open(name, flags, fapl=fapl)
+  File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper
+  File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper
+  File "h5py/h5f.pyx", line 102, in h5py.h5f.open
+OSError: Unable to synchronously open file (file is already open for write (may use <h5clear file> to clear file consistency flags))
