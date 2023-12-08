@@ -6,7 +6,6 @@ from ucsfbids.subjects.exporters.subjectupennexporter import SubjectUPENNExporte
 
 class DatasetUPENNExporter(DatasetBIDSExporter):
     def export_subjects(self, path: Path, sub_name_map: dict[str, str]):
-        print("using new version")
         assert self.dataset is not None
         for subject in self.dataset.subjects.values():
             subject.add_exporter("UPENN", SubjectUPENNExporter)
