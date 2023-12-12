@@ -11,8 +11,7 @@ name_map = {
     "EC0190": "UPenn0009",
     "EC0189": "UPenn0010",
     "EC0188": "UPenn0011",
-    "EC0187": "UPenn0012",
-    "EC0186": "UPenn0013",
+    "EC0186": "UPenn0012",
 }
 
 if __name__ == "__main__":
