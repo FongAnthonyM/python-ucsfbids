@@ -1,4 +1,5 @@
 from pathlib import Path
+import warnings
 
 from ucsfbids.datasets import Dataset
 from ucsfbids.datasets.exporters.datasetupennexporter import DatasetUPENNExporter
@@ -17,4 +18,6 @@ name_map = {
 if __name__ == "__main__":
     dataset = Dataset(Path("~/kleen-lab/pia/userdata/rchristin/upenn-staging").expanduser())
     dataset.add_exporter("UPENN", DatasetUPENNExporter)
-    dataset.create_exporter("UPENN").execute_export(Path("/bids"), "staging", name_map)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        dataset.create_exporter("UPENN").execute_export(Path("/bids"), "staging", name_map)
