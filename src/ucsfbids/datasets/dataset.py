@@ -65,6 +65,8 @@ class Dataset(BaseComposite):
         init: bool = True,
         **kwargs: Any,
     ) -> None:
+        print(subjects_to_load)
+        print(load)
         # New Attributes #
         self._path: Path | None = None
         self._mode: str = "r"
@@ -76,7 +78,6 @@ class Dataset(BaseComposite):
         self.importers: dict[str, type] = self.default_importers.copy()
         self.exporters: dict[str, type] = self.default_exporters.copy()
 
-        print(subjects_to_load)
         # Parent Attributes #
         super().__init__(init=False)
 
