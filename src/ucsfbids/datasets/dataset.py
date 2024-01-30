@@ -57,11 +57,11 @@ class Dataset(BaseComposite):
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
-        subjects_to_load: list[str] | None = None,
         mode: str = "r",
         create: bool = False,
         load: bool = True,
         *,
+        subjects_to_load: list[str] | None = None,
         init: bool = True,
         **kwargs: Any,
     ) -> None:
@@ -112,10 +112,10 @@ class Dataset(BaseComposite):
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
-        subjects_to_load: list[str] | None = None,
         mode: str | None = None,
         create: bool = False,
         load: bool = False,
+        subjects_to_load: list[str] | None = None,
         **kwargs: Any,
     ) -> None:
         """Constructs this object.
