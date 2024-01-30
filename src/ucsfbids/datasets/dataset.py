@@ -60,8 +60,8 @@ class Dataset(BaseComposite):
         mode: str = "r",
         create: bool = False,
         load: bool = True,
-        *,
         subjects_to_load: list[str] | None = None,
+        *,
         init: bool = True,
         **kwargs: Any,
     ) -> None:
@@ -86,10 +86,10 @@ class Dataset(BaseComposite):
                 path=path,
                 name=name,
                 parent_path=parent_path,
-                subjects_to_load=subjects_to_load,
                 mode=mode,
                 create=create,
                 load=load,
+                subjects_to_load=subjects_to_load,
                 **kwargs,
             )
 
@@ -170,7 +170,6 @@ class Dataset(BaseComposite):
         m = self._mode if mode is None else mode
         self.subjects.clear()
         subjects_to_update = {}
-        print(subjects_to_load)
         for p in self.path.iterdir():
             if subjects_to_load is not None and not any(
                 [sub in p.as_posix() for sub in subjects_to_load]
