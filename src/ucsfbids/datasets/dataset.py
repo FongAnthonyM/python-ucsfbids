@@ -171,16 +171,19 @@ class Dataset(BaseComposite):
         print(subjects_to_load)
         subjects_to_update = {}
         for p in self.path.iterdir():
+            print(p.as_posix())
             if subjects_to_load is not None and not any(
                 [sub in p.as_posix() for sub in subjects_to_load]
             ):
-                print(p.as_posix())
+                print("None or not specified")
                 continue
             if not p.is_dir():
+                print("not a dir")
                 continue
             if (s := Subject(path=p, mode=m, load=load)) is not None:
+                print("subject returned none")
                 continue
-            subjects_to_update.update({s.name: s})
+            subjects_to_update[s.name] = s
 
         self.subjects.update(subjects_to_update)
 
