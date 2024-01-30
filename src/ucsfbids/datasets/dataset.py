@@ -169,6 +169,7 @@ class Dataset(BaseComposite):
         m = self._mode if mode is None else mode
         self.subjects.clear()
         subjects_to_update = {}
+        print(subjects_to_load)
         for p in self.path.iterdir():
             if subjects_to_load is not None and not any(
                 [sub in p.as_posix() for sub in subjects_to_load]
