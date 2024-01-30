@@ -76,10 +76,10 @@ class Dataset(BaseComposite):
         self.importers: dict[str, type] = self.default_importers.copy()
         self.exporters: dict[str, type] = self.default_exporters.copy()
 
+        print(subjects_to_load)
         # Parent Attributes #
         super().__init__(init=False)
 
-        print(subjects_to_load)
         # Object Construction #
         if init:
             self.construct(
