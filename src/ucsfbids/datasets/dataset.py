@@ -54,13 +54,13 @@ class Dataset(BaseComposite):
     # Construction/Destruction
     def __init__(
         self,
+        subjects_to_load: list[str] | None,
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
         mode: str = "r",
         create: bool = False,
         load: bool = True,
-        subjects_to_load: list[str] | None = None,
         *,
         init: bool = True,
         **kwargs: Any,
