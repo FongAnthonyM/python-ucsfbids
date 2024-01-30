@@ -168,7 +168,6 @@ class Dataset(BaseComposite):
         assert self.path is not None
         m = self._mode if mode is None else mode
         self.subjects.clear()
-        print(subjects_to_load)
         subjects_to_update = {}
         for p in self.path.iterdir():
             print(p.as_posix())
@@ -180,7 +179,7 @@ class Dataset(BaseComposite):
             if not p.is_dir():
                 print("not a dir")
                 continue
-            if (s := Subject(path=p, mode=m, load=load)) is not None:
+            if (s := Subject(path=p, mode=m, load=load)) is None:
                 print("subject returned none")
                 continue
             subjects_to_update[s.name] = s
