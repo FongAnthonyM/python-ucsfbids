@@ -165,20 +165,22 @@ class Dataset(BaseComposite):
         load: bool = True,
     ) -> None:
         """Loads all sessions in this subject."""
+        assert self.path is not None
         m = self._mode if mode is None else mode
         self.subjects.clear()
-        self.subjects.update(
-            {
-                s.name: s
-                for p in self.path.iterdir()
-                if p.is_dir()
-                and (
-                    subjects_to_load is None
-                    or any([sub in p.as_posix() for sub in subjects_to_load])
-                )
-                and (s := Subject(path=p, mode=m, load=load)) is not None
-            },
-        )
+        subjects_to_update = {}
+        for p in self.path.iterdir():
+            if subjects_to_load is not None and not any(
+                [sub in p.as_posix() for sub in subjects_to_load]
+            ):
+                continue
+            if not p.is_dir():
+                continue
+            if (s := Subject(path=p, mode=m, load=load)) is not None:
+                continue
+            subjects_to_update.update({s.name: s})
+
+        self.subjects.update(subjects_to_update)
 
     def generate_latest_subject_name(self) -> str:
         """Generates a session name for a new latest session.
