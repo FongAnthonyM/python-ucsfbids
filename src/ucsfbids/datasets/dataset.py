@@ -79,6 +79,7 @@ class Dataset(BaseComposite):
         # Parent Attributes #
         super().__init__(init=False)
 
+        print(subjects_to_load)
         # Object Construction #
         if init:
             self.construct(
