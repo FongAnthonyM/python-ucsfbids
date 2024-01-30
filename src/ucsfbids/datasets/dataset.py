@@ -65,8 +65,6 @@ class Dataset(BaseComposite):
         init: bool = True,
         **kwargs: Any,
     ) -> None:
-        print(subjects_to_load)
-        print(load)
         # New Attributes #
         self._path: Path | None = None
         self._mode: str = "r"
@@ -170,11 +168,13 @@ class Dataset(BaseComposite):
         assert self.path is not None
         m = self._mode if mode is None else mode
         self.subjects.clear()
+        print(subjects_to_load)
         subjects_to_update = {}
         for p in self.path.iterdir():
             if subjects_to_load is not None and not any(
                 [sub in p.as_posix() for sub in subjects_to_load]
             ):
+                print(p.as_posix())
                 continue
             if not p.is_dir():
                 continue
