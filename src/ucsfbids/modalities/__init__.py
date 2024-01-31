@@ -13,9 +13,10 @@ __email__ = __email__
 
 # Imports #
 # Local Packages #
-from .exporters import *
-from .modality import Modality
-from .anatomy import Anatomy
-from .ct import CT
-from .ieeg import IEEG
-from .ieegcdfs import IEEGCDFS
+from .exporters import *  # noqa
+from .modality import Modality  # noqa
+from .anatomy import DTI  # noqa
+from .ct import CT  # noqa
+from .ieeg import IEEG  # noqa
+from .ieegcdfs import IEEGCDFS  # noqa
+from .dti import DTI  # noqa

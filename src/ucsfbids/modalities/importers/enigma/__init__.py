@@ -15,3 +15,4 @@ __email__ = __email__
 # Local Packages #
 from .anatomyenigmaimporter import AnatomyEnigmaImporter  # noqa
 from .ctenigmaimporter import CTEnigmaImporter  # noqa
+from .dtienigmaimporter import DTIImporter  # noqa
