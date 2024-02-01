@@ -39,7 +39,10 @@ TO_STRIP = [
     "InstitutionAddress",
     "DeviceSerialNumber",
 ]
-DEFAULT_FILES = []
+DEFAULT_FILES = [
+    FileSpec("dti", ".nii.gz", [Path("dti.nii.gz")]),
+    FileSpec("dti", ".json", [Path("dti.json")], copy_command=strip_json),
+]
 
 
 class DTIEnigmaImporter(DTIImporter):
@@ -65,9 +68,7 @@ class DTIEnigmaImporter(DTIImporter):
         assert self.src_root is not None
 
         for file in self.files:
-            imaging_root = (
-                self.src_root / "data_store2/imaging/subjects"
-            )  # TODO: fix path
+            imaging_root = self.src_root / "userdata/rchristin/dti"  # TODO: fix path
             new_path = path / f"{self.modality.full_name}_{file.suffix}{file.extension}"
             for filepath in file.path_from_root:
                 imaging_path = imaging_root / source_name / filepath
