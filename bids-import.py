@@ -3,27 +3,83 @@ from pathlib import Path
 from typing import List
 
 from ucsfbids.datasets import Dataset
-from ucsfbids.datasets.importers.pia import DatasetPiaImporter
-from ucsfbids.modalities.importers.pia.ieegpiaimporter import convert_electrodes
+from ucsfbids.datasets.importers.enigma import DatasetEnigmaImporter
 
-SUBJECTS: List[str] = ["EC0217", "EC0216"]
-SUBJECTS_ROOT: list[str] = ["EC217", "EC216"]
+SUBJECTS: List[str] = [
+    "Enigma1",
+    "Enigma2",
+    "Enigma3",
+    "Enigma4",
+    "Enigma5",
+    "Enigma6",
+    "Enigma7",
+    "Enigma8",
+    "Enigma9",
+    "Enigma10",
+    "Enigma11",
+    "Enigma12",
+    "Enigma13",
+    "Enigma14",
+    "Enigma15",
+    "Enigma16",
+    "Enigma17",
+    "Enigma18",
+    "Enigma19",
+    "Enigma20",
+    "Enigma21",
+    "Enigma22",
+    "Enigma23",
+    "Enigma24",
+    "Enigma25",
+    "Enigma26",
+    "Enigma27",
+    "Enigma28",
+    "Enigma29",
+    "Enigma30",
+]
+SUBJECTS_ROOT: list[str] = [
+    "EC101",
+    "EC102",
+    "EC186",
+    "EC188",
+    "EC189",
+    "EC190",
+    "EC191",
+    "EC192",
+    "EC196",
+    "EC197",
+    "EC201",
+    "EC202",
+    "EC203",
+    "EC204",
+    "EC206",
+    "EC210",
+    "EC212",
+    "EC213",
+    "EC214",
+    "EC219",
+    "EC241",
+    "EC243",
+    "EC244",
+    "EC253",
+    "EC265",
+    "EC271",
+    "EC273",
+    "EC274",
+    "EC275",
+    "EC276",
+]
 
 if __name__ == "__main__":
-    Dataset.default_importers["Pia"] = DatasetPiaImporter
+    Dataset.default_importers["Pia"] = DatasetEnigmaImporter
     dataset = Dataset(
-        parent_path=Path(os.path.expanduser("~/pia/userdata/rchristin/")),
-        name="test-ucsfbids-5",
+        subjects_to_load=None,
+        parent_path=Path(os.path.expanduser("~/")),
+        name="enigma",
         mode="w",
         create=True,
         load=False,
     )
-    dataset.create_importer("Pia", Path("~/pia").expanduser(), subjects=SUBJECTS).execute_import(
-        source_patients=SUBJECTS_ROOT
-    )
-    clinical_path = Path("~/Kleen-Lab/data/imaging/EC217/Imaging/elecs/clinical_elecs_all.mat").expanduser()
-    dst = Path(
-        "~/pia/userdata/rchristin/test-ucsfbids-5/sub-EC0217/ses-clinicalintracranial/ieeg/sub-EC0217_ses-clinicalintracranial_electrodes.tsv"
-    )
-
-    convert_electrodes(clinical_path, dst)
+    dataset.create_importer(
+        "Pia", Path("~/pia").expanduser(), subjects=SUBJECTS
+    ).execute_import(source_patients=SUBJECTS_ROOT)

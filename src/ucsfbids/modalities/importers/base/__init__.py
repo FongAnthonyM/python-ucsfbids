@@ -13,7 +13,7 @@ __email__ = __email__
 
 # Imports #
 # Local Packages #
-from .anatomyimporter import DTIImporter  # noqa
+from .anatomyimporter import AnatomyImporter  # noqa
 from .ctimporter import CTImporter  # noqa
 from .ieegimporter import IEEGImporter  # noqa
 from .dtiimporter import DTIImporter  # noqa

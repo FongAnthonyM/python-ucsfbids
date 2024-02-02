@@ -12,24 +12,23 @@ from pathlib import Path
 from typing import Any
 
 from ucsfbids.importspec import ModalitySpec
-from ucsfbids.modalities import CT, IEEG, Anatomy
+from ucsfbids.modalities import CT, Anatomy, DTI
 from ucsfbids.modalities.importers.enigma import (
     AnatomyEnigmaImporter,
     CTEnigmaImporter,
-    IEEGEnigmaImporter,
+    DTIEnigmaImporter,
 )
 from ucsfbids.sessions import Session
 from ucsfbids.sessions.importers import SessionImporter
 
 DEFAULT_MODALITIES = [
     ModalitySpec("anat", Anatomy, "Enigma", AnatomyEnigmaImporter),
-    ModalitySpec("ieeg", IEEG, "Enigma", IEEGEnigmaImporter),
     ModalitySpec("ct", CT, "Enigma", CTEnigmaImporter),
-    # ModalitySpec("dti", DTI, "Enigma", DTIEnigmaImporter),
+    ModalitySpec("dti", DTI, "Enigma", DTIEnigmaImporter),
 ]
 
 
-class SessionPiaImporter(SessionImporter):
+class SessionEnigmaImporter(SessionImporter):
     def construct(
         self,
         session: Session | None = None,
@@ -68,4 +67,4 @@ class SessionPiaImporter(SessionImporter):
         self.import_modalities(path=new_path, source_patient=source_patient)
 
 
-Session.default_importers["Enigma"] = SessionPiaImporter
+Session.default_importers["Enigma"] = SessionEnigmaImporter

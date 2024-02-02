@@ -68,7 +68,7 @@ class DTIEnigmaImporter(DTIImporter):
         assert self.src_root is not None
 
         for file in self.files:
-            imaging_root = self.src_root / "userdata/rchristin/dti"  # TODO: fix path
+            imaging_root = Path("/Users/rchristin/Kleen-Lab/dti/")
             new_path = path / f"{self.modality.full_name}_{file.suffix}{file.extension}"
             for filepath in file.path_from_root:
                 imaging_path = imaging_root / source_name / filepath
