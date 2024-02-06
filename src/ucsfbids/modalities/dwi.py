@@ -27,7 +27,7 @@ from .modality import Modality
 
 # Definitions #
 # Classes #
-class DTI(Modality):
+class DWI(Modality):
     """A Session which contains a CDFS as part of its structure.
 
     Class Attributes:

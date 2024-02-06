@@ -12,11 +12,11 @@ from pathlib import Path
 from typing import Any
 
 from ucsfbids.importspec import ModalitySpec
-from ucsfbids.modalities import CT, Anatomy, DTI
+from ucsfbids.modalities import CT, Anatomy, DWI
 from ucsfbids.modalities.importers.enigma import (
     AnatomyEnigmaImporter,
     CTEnigmaImporter,
-    DTIEnigmaImporter,
+    DWIEnigmaImporter,
 )
 from ucsfbids.sessions import Session
 from ucsfbids.sessions.importers import SessionImporter
@@ -24,7 +24,7 @@ from ucsfbids.sessions.importers import SessionImporter
 DEFAULT_MODALITIES = [
     ModalitySpec("anat", Anatomy, "Enigma", AnatomyEnigmaImporter),
     ModalitySpec("ct", CT, "Enigma", CTEnigmaImporter),
-    ModalitySpec("dti", DTI, "Enigma", DTIEnigmaImporter),
+    ModalitySpec("dwi", DWI, "Enigma", DWIEnigmaImporter),
 ]
 
 

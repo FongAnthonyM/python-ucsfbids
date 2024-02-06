@@ -19,4 +19,4 @@ from .anatomy import Anatomy  # noqa
 from .ct import CT  # noqa
 from .ieeg import IEEG  # noqa
 from .ieegcdfs import IEEGCDFS  # noqa
-from .dti import DTI  # noqa
+from .dwi import DWI  # noqa

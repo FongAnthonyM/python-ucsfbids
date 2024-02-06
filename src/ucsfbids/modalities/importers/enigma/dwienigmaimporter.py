@@ -16,8 +16,8 @@ from pathlib import Path
 from typing import Any, Optional
 
 from ucsfbids.importspec import FileSpec
-from ucsfbids.modalities import DTI
-from ucsfbids.modalities.importers.base import DTIImporter
+from ucsfbids.modalities import DWI
+from ucsfbids.modalities.importers.base import DWIImporter
 
 
 def strip_json(old_path, new_path):
@@ -40,15 +40,17 @@ TO_STRIP = [
     "DeviceSerialNumber",
 ]
 DEFAULT_FILES = [
-    FileSpec("dti", ".nii.gz", [Path("dti.nii.gz")]),
-    FileSpec("dti", ".json", [Path("dti.json")], copy_command=strip_json),
+    FileSpec("dwi", ".nii.gz", [Path("dti.nii.gz")]),
+    FileSpec("dwi", ".json", [Path("dti.json")], copy_command=strip_json),
+    FileSpec("dwi", ".bval", [Path("dti.bval")]),
+    FileSpec("dwi", ".bvec", [Path("dti.bvec")]),
 ]
 
 
-class DTIEnigmaImporter(DTIImporter):
+class DWIEnigmaImporter(DWIImporter):
     def construct(
         self,
-        modality: Optional[DTI] = None,
+        modality: Optional[DWI] = None,
         src_root: Optional[Path] = None,
         files: list[FileSpec] = [],
         **kwargs: Any,
@@ -98,4 +100,4 @@ class DTIEnigmaImporter(DTIImporter):
                 )
 
 
-DTI.default_importers["Enigma"] = DTIEnigmaImporter
+DWI.default_importers["Enigma"] = DWIEnigmaImporter

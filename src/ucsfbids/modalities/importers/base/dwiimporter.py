@@ -13,22 +13,22 @@ from pathlib import Path
 from typing import Any, Optional
 
 from ucsfbids.importspec import FileSpec
-from ucsfbids.modalities import DTI
+from ucsfbids.modalities import DWI
 
 from ...importers import ModalityImporter
 
 
-class DTIImporter(ModalityImporter):
+class DWIImporter(ModalityImporter):
     def __init__(
         self,
-        modality: Optional[DTI] = None,
+        modality: Optional[DWI] = None,
         src_root: Optional[Path] = None,
         files: list[FileSpec] = [],
         *,
         init: bool = True,
         **kwargs: Any,
     ) -> None:
-        self.modality: Optional[DTI] = None
+        self.modality: Optional[DWI] = None
         self.src_root: Optional[Path] = None
         self.files: list[FileSpec] = []
 
