@@ -80,6 +80,7 @@ class DatasetBIDSExporter(BaseObject):
         assert self.dataset is not None
         assert self.dataset.path is not None
         for file in [f for f in self.dataset.path.iterdir() if f.is_file()]:
+            print(file)
             shutil.copy2(file, new_path / file.name)
         self.export_subjects(path=new_path, sub_name_map=sub_name_map)
 

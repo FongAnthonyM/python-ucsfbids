@@ -70,7 +70,7 @@ DEFAULT_FILES = [
     FileSpec(
         "electrodes",
         ".tsv",
-        [Path("elecs/clinical_elecs_all.mat"), Path("elecs/clinical_TDT_elecs_all.mat")],
+        [Path("elecs/clinical_elecs_all.mat"), Path("elecs/clinical_TDT_elecs_all.mat"), Path("elecs/clinical_elecs_all1.mat")],
         copy_command=convert_electrodes,
     ),
     FileSpec("coordsystem", ".json", [Path("")], copy_command=create_coords),
