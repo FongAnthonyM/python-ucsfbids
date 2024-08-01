@@ -1,5 +1,5 @@
-"""anatomy.py
-A Session which contains a CDFS as part of its structure.
+"""ieeg.py
+
 """
 # Package Header #
 from ..header import *
@@ -11,22 +11,16 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
+# Imports #
+# Standard Libraries #
 from pathlib import Path
 from typing import Any
 
+# Third-Party Packages #
 import pandas as pd
 
-# Imports #
-# Standard Libraries #
-from baseobjects import BaseComposite
-from baseobjects.cachingtools import CachingObject, timed_keyless_cache
-
-# Third-Party Packages #
-from cdfs import CDFS
-
-from .exporters import IEEGBIDSExporter
-
 # Local Packages #
+from .exporters import IEEGBIDSExporter
 from .modality import Modality
 
 

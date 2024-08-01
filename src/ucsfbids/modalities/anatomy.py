@@ -1,5 +1,5 @@
 """anatomy.py
-A Session which contains a CDFS as part of its structure.
+
 """
 # Package Header #
 from ..header import *
@@ -16,15 +16,11 @@ from typing import Any
 
 # Imports #
 # Standard Libraries #
-from baseobjects import BaseComposite
-from baseobjects.cachingtools import CachingObject, timed_keyless_cache
 
 # Third-Party Packages #
-from cdfs import CDFS
-
-from .exporters import AnatomyBIDSExporter
 
 # Local Packages #
+from .exporters import AnatomyBIDSExporter
 from .modality import Modality
 
 
