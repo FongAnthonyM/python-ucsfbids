@@ -11,16 +11,20 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
-# Imports #
-# Standard Libraries #
 from pathlib import Path
 from typing import Any
 
+# Imports #
+# Standard Libraries #
+from baseobjects import BaseComposite
+from baseobjects.cachingtools import CachingObject, timed_keyless_cache
+
 # Third-Party Packages #
-from cdfs import BaseCDFS
+from cdfs import CDFS
+
+from .exporters import IEEGBIDSExporter
 
 # Local Packages #
-from .exporters import IEEGBIDSExporter
 from .ieeg import IEEG
 
 
@@ -58,7 +62,7 @@ class IEEGCDFS(IEEG):
 
     default_meta_info: dict[str, Any] = IEEG.default_meta_info.copy()
     default_exporters: dict[str, type] = {"BIDS": IEEGBIDSExporter}
-    cdfs_type: type[BaseCDFS] = BaseCDFS
+    cdfs_type: type[CDFS] = CDFS
 
     # Magic Methods #
     # Construction/Destruction
@@ -74,7 +78,7 @@ class IEEGCDFS(IEEG):
         **kwargs: Any,
     ) -> None:
         # New Attributes #
-        self.cdfs: BaseCDFS | None = None
+        self.cdfs: CDFS | None = None
 
         # Parent Attributes #
         super().__init__(init=False)
@@ -99,7 +103,7 @@ class IEEGCDFS(IEEG):
         """
         return f"{self.full_name}_contents.sqlite3"
 
-    def require_cdfs(self, **kwargs: Any) -> BaseCDFS:
+    def require_cdfs(self, **kwargs: Any) -> CDFS:
         """Creates or loads the CDFS of this session.
 
         Args:
@@ -112,7 +116,6 @@ class IEEGCDFS(IEEG):
             path=self.path,
             name=self.full_name,
             mode=self._mode,
-            create=True,
             contents_name=self.generate_contents_file_name(),
             **kwargs,
         )
@@ -122,5 +125,5 @@ class IEEGCDFS(IEEG):
         """Creates and sets up the ieeg directory."""
         self.path.mkdir(exist_ok=True)
         self.create_meta_info()
-        self.require_cdfs(open_=True)
+        self.require_cdfs(open_=True, create=True)
         self.cdfs.close()
