@@ -13,7 +13,5 @@ __email__ = __email__
 
 # Imports #
 # Local Packages #
-from .anatomyimporter import AnatomyImporter  # noqa
-from .ctimporter import CTImporter  # noqa
-from .ieegimporter import IEEGImporter  # noqa
-from .dwiimporter import DWIImporter  # noqa
+
+from .datasetenigmaimporter import DatasetEnigmaImporter  # noqa
