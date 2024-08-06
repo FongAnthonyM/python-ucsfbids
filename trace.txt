@@ -1,0 +1,42 @@
+Traceback (most recent call last):
+  File "/home/raphchr/kleen-lab/python/python-ucsfbids/upenn-export.py", line 20, in <module>
+    dataset.create_exporter("UPENN").execute_export(Path("/bids"), "staging", name_map)
+  File "/home/raphchr/kleen-lab/python/python-ucsfbids/src/ucsfbids/datasets/exporters/datasetbidsexporter.py", line 84, in execute_export
+    self.export_subjects(path=new_path, sub_name_map=sub_name_map)
+  File "/home/raphchr/kleen-lab/python/python-ucsfbids/src/ucsfbids/datasets/exporters/datasetupennexporter.py", line 15, in export_subjects
+    subject.create_exporter("UPENN").execute_export(path, new_name)
+  File "/home/raphchr/kleen-lab/python/python-ucsfbids/src/ucsfbids/subjects/exporters/subjectbidsexporter.py", line 80, in execute_export
+    self.export_sessions(path=new_path)
+  File "/home/raphchr/kleen-lab/python/python-ucsfbids/src/ucsfbids/subjects/exporters/subjectupennexporter.py", line 21, in export_sessions
+    session.create_exporter("UPENNImplant").execute_export(path, name="implant01")
+  File "/home/raphchr/kleen-lab/python/python-ucsfbids/src/ucsfbids/sessions/exporters/sessionbidsexporter.py", line 79, in execute_export
+    self.export_modalities(path=new_path, name=full_name)
+  File "/home/raphchr/kleen-lab/python/python-ucsfbids/src/ucsfbids/sessions/exporters/sessionupennimplantexporter.py", line 27, in export_modalities
+    mod.create_exporter("UPENN").execute_export(path, name=name)
+  File "/home/raphchr/kleen-lab/python/python-xltektools/src/xltektools/xltekucsfbids/modalities/exporters/ieegxltekbidsexporter.py", line 98, in execute_export
+    self.export_data(path=new_path, name=name)
+  File "/home/raphchr/kleen-lab/python/python-baseobjects/src/baseobjects/functions/callablemultiplexer.py", line 239, in __call__
+    return self._func_.__get__(self._self_(), self.__owner__)(*args, **kwargs)
+  File "/home/raphchr/kleen-lab/python/python-xltektools/src/xltektools/xltekucsfbids/modalities/exporters/ieegxltekbidsexporter.py", line 92, in export_data_as_days
+    self.cdfs_exporter.export_as_days(path=path, name=name)
+  File "/home/raphchr/kleen-lab/python/python-xltektools/src/xltektools/xltekcdfs/xltekcdfsedfexporter.py", line 243, in export_as_days
+    flat_data.time_tolerance = flat_data.sample_period
+  File "/home/raphchr/kleen-lab/python/python-proxyarrays/src/proxyarrays/timeproxy/timeproxy.py", line 277, in sample_period
+    return self.get_sample_period.caching_call()
+  File "/home/raphchr/kleen-lab/python/python-baseobjects/src/baseobjects/cachingtools/caches/basetimedcache.py", line 381, in caching_call
+    return self.cache(self.__self__, *args, **kwargs)
+  File "/home/raphchr/kleen-lab/python/python-baseobjects/src/baseobjects/functions/callablemultiplexer.py", line 239, in __call__
+    return self._func_.__get__(self._self_(), self.__owner__)(*args, **kwargs)
+  File "/home/raphchr/kleen-lab/python/python-baseobjects/src/baseobjects/cachingtools/caches/timedkeylesscache.py", line 86, in caching
+    self.cache_container = self.__func__(*args, **kwargs)
+  File "/home/raphchr/kleen-lab/python/python-baseobjects/src/baseobjects/functions/dynamiccallable.py", line 106, in __call__
+    return self.call_multiplexer(*args, **kwargs)
+  File "/home/raphchr/kleen-lab/python/python-baseobjects/src/baseobjects/functions/callablemultiplexer.py", line 239, in __call__
+    return self._func_.__get__(self._self_(), self.__owner__)(*args, **kwargs)
+  File "/home/raphchr/kleen-lab/python/python-baseobjects/src/baseobjects/functions/dynamiccallable.py", line 120, in call
+    return self.__func__(*args, **kwargs)
+  File "/home/raphchr/kleen-lab/python/python-proxyarrays/src/proxyarrays/timeproxy/timeproxy.py", line 520, in get_sample_period
+    if self.validate_sample_rate():
+  File "/home/raphchr/kleen-lab/python/python-proxyarrays/src/proxyarrays/timeproxy/timeproxy.py", line 573, in validate_sample_rate
+    return (sample_rates == sample_rates[0]).all()
+IndexError: index 0 is out of bounds for axis 0 with size 0

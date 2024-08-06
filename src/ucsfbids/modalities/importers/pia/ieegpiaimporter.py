@@ -42,6 +42,7 @@ def convert_electrodes(old_path, new_path):
     )
     xyz = original_montage["elecmatrix"]
     eleclabels = original_montage["eleclabels"]
+    eleclabels = eleclabels[: len(xyz), :]
     bids_montage.loc[:, "x"] = xyz[:, 0]
     bids_montage.loc[:, "y"] = xyz[:, 1]
     bids_montage.loc[:, "z"] = xyz[:, 2]
@@ -69,7 +70,7 @@ DEFAULT_FILES = [
     FileSpec(
         "electrodes",
         ".tsv",
-        [Path("elecs/clinical_elecs_all.mat"), Path("elecs/clinical_TDT_elecs_all.mat")],
+        [Path("elecs/clinical_elecs_all.mat"), Path("elecs/clinical_TDT_elecs_all.mat"), Path("elecs/clinical_elecs_all1.mat")],
         copy_command=convert_electrodes,
     ),
     FileSpec("coordsystem", ".json", [Path("")], copy_command=create_coords),

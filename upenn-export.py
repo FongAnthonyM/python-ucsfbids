@@ -1,17 +1,23 @@
 from pathlib import Path
+import warnings
 
 from ucsfbids.datasets import Dataset
 from ucsfbids.datasets.exporters.datasetupennexporter import DatasetUPENNExporter
 
 name_map = {
-    "EC0219": "UPenn0001",
-    "EC0214": "UPenn0002",
-    "EC0213": "UPenn0003",
-    "EC0210": "UPenn0004",
-    "EC0208": "UPenn0005",
+    "EC0204": "UPenn0005",
+    "EC0203": "UPenn0006",
+    "EC0202": "UPenn0007",
+    "EC0201": "UPenn0008",
+    "EC0190": "UPenn0009",
+    "EC0189": "UPenn0010",
+    "EC0188": "UPenn0011",
+    "EC0186": "UPenn0012",
 }
 
 if __name__ == "__main__":
-    dataset = Dataset(Path("~/pia/userdata/rchristin/test-ucsfbids-5").expanduser())
+    dataset = Dataset(Path("~/kleen-lab/pia/userdata/rchristin/upenn-staging").expanduser())
     dataset.add_exporter("UPENN", DatasetUPENNExporter)
-    dataset.create_exporter("UPENN").execute_export(Path("~/Kleen-Lab/bids-mount").expanduser(), "test", name_map)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        dataset.create_exporter("UPENN").execute_export(Path("/bids"), "staging", name_map)

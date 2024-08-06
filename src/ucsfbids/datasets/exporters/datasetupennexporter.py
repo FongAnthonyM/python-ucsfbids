@@ -1,4 +1,5 @@
 from pathlib import Path
+import traceback
 
 from ucsfbids.datasets.exporters import DatasetBIDSExporter
 from ucsfbids.subjects.exporters.subjectupennexporter import SubjectUPENNExporter
@@ -10,5 +11,14 @@ class DatasetUPENNExporter(DatasetBIDSExporter):
         for subject in self.dataset.subjects.values():
             subject.add_exporter("UPENN", SubjectUPENNExporter)
             assert subject.name is not None
+            print(f"Now exporting subject {subject.name}")
+            if subject.name not in sub_name_map:
+                continue
             new_name = sub_name_map[subject.name]
-            subject.create_exporter("UPENN").execute_export(path, new_name)
+            try:
+                subject.create_exporter("UPENN").execute_export(path, new_name)
+            except Exception as e:
+                print(f"There was an error with patient{subject.name}")
+                print(f"{e}")
+                print(f"{traceback.print_exc()}")
+                continue

@@ -54,6 +54,7 @@ class Dataset(BaseComposite):
     # Construction/Destruction
     def __init__(
         self,
+        subjects_to_load: list[str] | None,
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
@@ -87,6 +88,7 @@ class Dataset(BaseComposite):
                 mode=mode,
                 create=create,
                 load=load,
+                subjects_to_load=subjects_to_load,
                 **kwargs,
             )
 
@@ -112,6 +114,7 @@ class Dataset(BaseComposite):
         mode: str | None = None,
         create: bool = False,
         load: bool = False,
+        subjects_to_load: list[str] | None = None,
         **kwargs: Any,
     ) -> None:
         """Constructs this object.
@@ -138,11 +141,13 @@ class Dataset(BaseComposite):
             if name is None:
                 self.name = self.path.stem
         elif parent_path is not None and self.name is not None:
-            self.path = (parent_path if isinstance(parent_path, Path) else Path(parent_path)) / f"{self.name}"
+            self.path = (
+                parent_path if isinstance(parent_path, Path) else Path(parent_path)
+            ) / f"{self.name}"
 
         if self.path is not None:
             if load and self.path.exists():
-                self.load_subjects()
+                self.load_subjects(subjects_to_load)
             elif create:
                 self.create()
 
@@ -153,17 +158,29 @@ class Dataset(BaseComposite):
         assert self.path is not None
         self.path.mkdir(exist_ok=True)
 
-    def load_subjects(self, mode: str | None = None, load: bool = True) -> None:
+    def load_subjects(
+        self,
+        subjects_to_load: list[str] | None = None,
+        mode: str | None = None,
+        load: bool = True,
+    ) -> None:
         """Loads all sessions in this subject."""
+        assert self.path is not None
         m = self._mode if mode is None else mode
         self.subjects.clear()
-        self.subjects.update(
-            {
-                s.name: s
-                for p in self.path.iterdir()
-                if p.is_dir() and (s := Subject(path=p, mode=m, load=load)) is not None
-            },
-        )
+        subjects_to_update = {}
+        for p in self.path.iterdir():
+            if subjects_to_load is not None and not any(
+                [sub in p.as_posix() for sub in subjects_to_load]
+            ):
+                continue
+            if not p.is_dir():
+                continue
+            if (s := Subject(path=p, mode=m, load=load)) is None:
+                continue
+            subjects_to_update[s.name] = s
+
+        self.subjects.update(subjects_to_update)
 
     def generate_latest_subject_name(self) -> str:
         """Generates a session name for a new latest session.
