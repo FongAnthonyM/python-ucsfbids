@@ -2,7 +2,7 @@ from pathlib import Path
 import warnings
 
 from ucsfbids.datasets import Dataset
-from ucsfbids.exporters.upenn._datasetupennexporter import DatasetUPENNExporter
+from ucsfbids.exporters.upenn.datasetupennexporter import DatasetUPENNExporter
 
 name_map = {
     "EC0204": "UPenn0005",

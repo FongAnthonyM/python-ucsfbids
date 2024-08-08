@@ -1,8 +1,8 @@
-"""ieegcdfs.py
+"""anatomy.py
 
 """
 # Package Header #
-from ..header import *
+from ...header import *
 
 # Header #
 __author__ = __author__
@@ -13,20 +13,19 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
+from collections.abc import MutableMapping
 from typing import Any
 
 # Third-Party Packages #
-from cdfs import BaseCDFS
 
 # Local Packages #
-from ..base import BaseImporter, BaseExporter
-from ...exporters import IEEGBIDSExporter
-from .ieeg import IEEG
+from ...base import BaseImporter, BaseExporter
+from ..modality import Modality
 
 
 # Definitions #
 # Classes #
-class IEEGCDFS(IEEG):
+class Anatomy(Modality):
     """A Session which contains a CDFS as part of its structure.
 
     Class Attributes:
@@ -57,44 +56,9 @@ class IEEGCDFS(IEEG):
     """
 
     # Attributes #
-    meta_information: dict[str, Any] = IEEG.meta_information.copy()
+    name: str = "anat"
 
-    cdfs_type: type[BaseCDFS] = BaseCDFS
-    cdfs: BaseCDFS | None = None
+    meta_information: dict[str, Any] = Modality.meta_information.copy()
 
-    importers: dict[str, tuple[type[BaseImporter], dict[str, Any]]] = {}
-    exporters: dict[str, tuple[type[BaseExporter], dict[str, Any]]] = {"BIDS": (IEEGBIDSExporter, {})}
-
-    # Instance Methods #
-    def build(self) -> None:
-        super().build()
-        self.require_cdfs(open_=True)
-        self.cdfs.close()
-
-    def generate_contents_file_name(self) -> str:
-        """Generates a name for the contents file from the subject and session name.
-
-        Returns:
-            The name of the contents file.
-        """
-        return f"{self.full_name}_contents.sqlite3"
-
-    def require_cdfs(self, **kwargs: Any) -> BaseCDFS:
-        """Creates or loads the CDFS of this session.
-
-        Args:
-            **kwargs: The keyword arguments for creating the CDFS.
-
-        Returns:
-            The CDFS of this session.
-        """
-        self.cdfs = cdfs = self.cdfs_type(
-            path=self.path,
-            name=self.full_name,
-            mode=self._mode,
-            create=True,
-            contents_name=self.generate_contents_file_name(),
-            **kwargs,
-        )
-        return cdfs
-
+    importers: MutableMapping[str, tuple[type[BaseImporter], dict[str, Any]]] = Modality.importers.new_child()
+    exporters: MutableMapping[str, tuple[type[BaseExporter], dict[str, Any]]] = Modality.exporters.new_child()

@@ -13,7 +13,8 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
-from collections.abc import Iterable
+from collections.abc import Iterable, MutableMapping
+from collections import ChainMap
 import json
 from pathlib import Path
 from typing import ClassVar, Any
@@ -22,7 +23,7 @@ from typing import ClassVar, Any
 from baseobjects.objects.dispatchableclass import DispatchableClass
 
 # Local Packages #
-from ..base import BaseBIDSDirectory
+from ..base import BaseBIDSDirectory, BaseImporter, BaseExporter
 from ..modalities import Modality
 
 
@@ -117,6 +118,9 @@ class Session(BaseBIDSDirectory, DispatchableClass):
 
     # Attributes #
     subject_name: str | None = None
+
+    importers: MutableMapping[str, tuple[type[BaseImporter], dict[str, Any]]] = ChainMap()
+    exporters: MutableMapping[str, tuple[type[BaseExporter], dict[str, Any]]] = ChainMap()
 
     meta_information: dict[str, Any] = {
         "SessionNamespace": "",

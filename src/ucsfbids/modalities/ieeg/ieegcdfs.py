@@ -1,8 +1,8 @@
-"""anatomy.py
+"""ieegcdfs.py
 
 """
 # Package Header #
-from ..header import *
+from ...header import *
 
 # Header #
 __author__ = __author__
@@ -13,18 +13,19 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
-from typing import Any
+from typing import ClassVar, Any
 
 # Third-Party Packages #
 
 # Local Packages #
-from ..base import BaseImporter, BaseExporter
-from .modality import Modality
+from ...base import BaseImporter, BaseExporter
+from .ieeg import IEEG
+from .components.ieegcdfs import IEEGCDFSComponent
 
 
 # Definitions #
 # Classes #
-class Anatomy(Modality):
+class IEEGCDFS(IEEG):
     """A Session which contains a CDFS as part of its structure.
 
     Class Attributes:
@@ -54,10 +55,14 @@ class Anatomy(Modality):
         kwargs: The keyword arguments for inheritance.
     """
 
-    # Attributes #
-    name: str = "anat"
+    # Class Attributes #
+    default_component_types: ClassVar[dict[str, tuple[type, dict[str, Any]]]] = {
+        "cdfs": (IEEGCDFSComponent, {}),
+    }
 
-    meta_information: dict[str, Any] = Modality.meta_information.copy()
+    # Attributes #
+    meta_information: dict[str, Any] = IEEG.meta_information.copy()
 
     importers: dict[str, tuple[type[BaseImporter], dict[str, Any]]] = {}
     exporters: dict[str, tuple[type[BaseExporter], dict[str, Any]]] = {}
+

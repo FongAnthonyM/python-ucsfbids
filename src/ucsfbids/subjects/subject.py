@@ -13,14 +13,15 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
-from collections.abc import Iterable
+from collections.abc import Iterable, MutableMapping
+from collections import ChainMap
 from pathlib import Path
 from typing import Any
 
 # Third-Party Packages #
 
 # Local Packages #
-from ..base import BaseBIDSDirectory
+from ..base import BaseBIDSDirectory, BaseImporter, BaseExporter
 from ..sessions import Session
 
 
@@ -88,6 +89,9 @@ class Subject(BaseBIDSDirectory):
     # Attributes #
     session_prefix: str = "S"
     session_digits: int = 4
+
+    importers: MutableMapping[str, tuple[type[BaseImporter], dict[str, Any]]] = ChainMap()
+    exporters: MutableMapping[str, tuple[type[BaseExporter], dict[str, Any]]] = ChainMap()
 
     meta_information: dict[str, Any] = {
         "SubjectNamespace": "",

@@ -18,4 +18,3 @@ from .sessionexporter import SessionExporter
 from .subjectexporter import SubjectExporter
 from .datasetexporter import DatasetExporter
 from .bids import *
-from .upenn import *

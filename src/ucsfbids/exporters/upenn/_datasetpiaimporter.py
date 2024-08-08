@@ -1,4 +1,4 @@
-"""datasetpiaimporter.py
+"""_datasetpiaimporter.py
 """
 from ucsfbids.header import __author__, __credits__, __email__, __maintainer__
 

@@ -2,7 +2,7 @@
 
 """
 # Package Header #
-from ..header import *
+from ...header import *
 
 # Header #
 __author__ = __author__
@@ -13,6 +13,7 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
+from collections.abc import MutableMapping
 from pathlib import Path
 from typing import Any
 
@@ -20,8 +21,8 @@ from typing import Any
 import pandas as pd
 
 # Local Packages #
-from ..base import BaseImporter, BaseExporter
-from .modality import Modality
+from ...base import BaseImporter, BaseExporter
+from ..modality import Modality
 
 
 # Definitions #
@@ -61,8 +62,23 @@ class IEEG(Modality):
 
     meta_information: dict[str, Any] = Modality.meta_information.copy()
 
-    importers: dict[str, tuple[type[BaseImporter], dict[str, Any]]] = {}
-    exporters: dict[str, tuple[type[BaseExporter], dict[str, Any]]] = {}
+    electrode_columns: list[str] = [
+        "name",
+        "x",
+        "y",
+        "z",
+        "size",
+        "material",
+        "manufacturer",
+        "group",
+        "hemisphere",
+        "type",
+        "impedance",
+    ]
+    electrodes: pd.DataFrame | None = None
+
+    importers: MutableMapping[str, tuple[type[BaseImporter], dict[str, Any]]] = Modality.importers.new_child()
+    exporters: MutableMapping[str, tuple[type[BaseExporter], dict[str, Any]]] = Modality.exporters.new_child()
 
     # Properties #
     @property
@@ -72,10 +88,22 @@ class IEEG(Modality):
 
     # Instance Methods #
     # Electrodes
+    def create_electrodes(self) -> None:
+        """Creates electrodes file and saves the electrodes."""
+        if self.electrodes is None:
+            self.electrodes = pd.DataFrame(columns=self.electrode_columns)
+
+        self.electrodes.to_csv(self.electrodes_path, mode=self._mode, sep="\t")
+
     def load_electrodes(self) -> pd.DataFrame:
         """Loads the electrode information from the file.
 
         Returns:
             The electrode information.
         """
-        return pd.read_csv(self.electrodes_path, sep="\t")
+        self.electrodes = electrodes = pd.read_csv(self.electrodes_path, sep="\t")
+        return electrodes
+
+    def save_electrodes(self) -> None:
+        """Saves the electrodes to the file."""
+        self.electrodes.to_csv(self.electrodes_path, mode=self._mode, sep="\t")

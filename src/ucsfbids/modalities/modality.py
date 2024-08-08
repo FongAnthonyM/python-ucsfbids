@@ -13,6 +13,8 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
+from collections.abc import MutableMapping
+from collections import ChainMap
 import json
 from pathlib import Path
 from typing import Any
@@ -21,7 +23,7 @@ from typing import Any
 from baseobjects.objects.dispatchableclass import DispatchableClass
 
 # Local Packages #
-from ..base import BaseBIDSDirectory
+from ..base import BaseBIDSDirectory, BaseImporter, BaseExporter
 
 
 # Definitions #
@@ -114,6 +116,9 @@ class Modality(BaseBIDSDirectory, DispatchableClass):
     # Attributes #
     subject_name: str | None = None
     session_name: str | None = None
+
+    importers: MutableMapping[str, tuple[type[BaseImporter], dict[str, Any]]] = ChainMap()
+    exporters: MutableMapping[str, tuple[type[BaseExporter], dict[str, Any]]] = ChainMap()
 
     meta_information: dict[str, Any] = {
         "ModalityNamespace": "",

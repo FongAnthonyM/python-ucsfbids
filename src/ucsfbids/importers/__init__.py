@@ -13,3 +13,8 @@ __email__ = __email__
 
 # Imports #
 # Local Packages #
+from .file import *
+from .modalityimporter import ModalityImporter
+from .sessionimporter import SessionImporter
+from .subjectimporter import SubjectImporter
+from .datasetimporter import DatasetImporter

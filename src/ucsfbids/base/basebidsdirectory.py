@@ -14,6 +14,7 @@ __email__ = __email__
 # Imports #
 # Standard Libraries #
 from abc import abstractmethod
+from collections.abc import MutableMapping
 import json
 from pathlib import Path
 from typing import ClassVar, Any
@@ -57,8 +58,8 @@ class BaseBIDSDirectory(BaseComposite):
 
     meta_information: dict[str, Any] = {}
 
-    importers: dict[str, tuple[type[BaseImporter], dict[str, Any]]] = {}
-    exporters: dict[str, tuple[type[BaseExporter], dict[str, Any]]] = {}
+    importers: MutableMapping[str, tuple[type[BaseImporter], dict[str, Any]]]
+    exporters: MutableMapping[str, tuple[type[BaseExporter], dict[str, Any]]]
 
     # Properties #
     @property
@@ -101,8 +102,10 @@ class BaseBIDSDirectory(BaseComposite):
         **kwargs: Any,
     ) -> None:
         # New Attributes #
-        self.importers = self.importers.copy()
-        self.exporters = self.exporters.copy()
+        self.meta_information = self.meta_information.copy()
+
+        self.importers = dict(self.importers)
+        self.exporters = dict(self.exporters)
 
         # Parent Attributes #
         super().__init__(init=False)

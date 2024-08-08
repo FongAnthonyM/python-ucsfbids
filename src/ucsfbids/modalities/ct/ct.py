@@ -1,8 +1,8 @@
-"""dwi.py
+"""ct.py
 
 """
 # Package Header #
-from ..header import *
+from ...header import *
 
 # Header #
 __author__ = __author__
@@ -13,18 +13,19 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
+from collections.abc import MutableMapping
 from typing import Any
 
 # Third-Party Packages #
 
 # Local Packages #
-from ..base import BaseImporter, BaseExporter
-from .modality import Modality
+from ...base import BaseImporter, BaseExporter
+from ..modality import Modality
 
 
 # Definitions #
 # Classes #
-class DWI(Modality):
+class CT(Modality):
     """A Session which contains a CDFS as part of its structure.
 
     Class Attributes:
@@ -55,9 +56,9 @@ class DWI(Modality):
     """
 
     # Attributes #
-    name: str = "dti"
+    name: str = "ct"
 
     meta_information: dict[str, Any] = Modality.meta_information.copy()
 
-    importers: dict[str, tuple[type[BaseImporter], dict[str, Any]]] = {}
-    exporters: dict[str, tuple[type[BaseExporter], dict[str, Any]]] = {}
+    importers: MutableMapping[str, tuple[type[BaseImporter], dict[str, Any]]] = Modality.importers.new_child()
+    exporters: MutableMapping[str, tuple[type[BaseExporter], dict[str, Any]]] = Modality.exporters.new_child()

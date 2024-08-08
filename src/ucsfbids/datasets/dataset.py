@@ -13,44 +13,30 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
-from collections.abc import Iterable
+from collections.abc import Iterable, MutableMapping
+from collections import ChainMap
 from pathlib import Path
 import json
 from typing import Any
 
 # Third-Party Packages #
+import pandas as pd
 
 # Local Packages #
-from ..base import BaseBIDSDirectory
+from ..base import BaseBIDSDirectory, BaseImporter, BaseExporter
 from ..subjects import Subject
 
 
 # Definitions #
 # Classes #
 class Dataset(BaseBIDSDirectory):
-    """A subject in the UCSF BIDS format.
-
-    Attributes:
-        _path: The path to subject.
-        _is_open: Determines if this subject and its contents are open.
-        _mode: The file mode of this subject.
-        name: The name of this subject.
-        sessions: The session of the subject.
-
-    Args:
-        path: The path to the subject's directory.
-        name: The ID name of the subject.
-        parent_path: The parent path of this subject.
-        mode: The file mode to set this subject to.
-        create: Determines if this subject will be created if it does not exist.
-        load: Determines if the sessions will be loaded from the subject's directory.
-        init: Determines if this object will construct.
-        kwargs: The keyword arguments for inheritance if any.
-    """
 
     # Attributes #
     subject_prefix: str = "S"
     subject_digits: int = 4
+
+    importers: MutableMapping[str, tuple[type[BaseImporter], dict[str, Any]]] = ChainMap()
+    exporters: MutableMapping[str, tuple[type[BaseExporter], dict[str, Any]]] = ChainMap()
 
     meta_information: dict[str, Any] = {
         "DatasetNamespace": "",
@@ -62,6 +48,9 @@ class Dataset(BaseBIDSDirectory):
         "BIDSVersion": "1.6.0",
         "DatasetType": "raw",
     }
+
+    participant_fields: dict[str, Any] = {}
+    participants: pd.DataFrame | None = None
     
     subjects: dict[str, Subject]
 
@@ -81,6 +70,16 @@ class Dataset(BaseBIDSDirectory):
         """The path to the description json file."""
         return self._path / f"dataset_description.json"
 
+    @property
+    def participant_fields_path(self) -> Path:
+        """The path to the participant json file."""
+        return self._path / f"participants.json"
+
+    @property
+    def participants_path(self) -> Path:
+        """The path to the participant tsv file."""
+        return self._path / f"participants.tsv"
+
     # Magic Methods #
     # Construction/Destruction
     def __init__(
@@ -98,6 +97,8 @@ class Dataset(BaseBIDSDirectory):
         **kwargs: Any,
     ) -> None:
         # New Attributes #
+        self.description = self.description.copy()
+        self.participant_fields = self.participant_fields.copy()
         self.subjects = {}
 
         # Parent Attributes #
@@ -127,7 +128,7 @@ class Dataset(BaseBIDSDirectory):
         mode: str | None = None,
         create: bool = False,
         build: bool = True,
-        load: bool = True,
+        load: bool = False,
         subjects_to_load: list[str] | None = None,
         **kwargs: Any,
     ) -> None:
@@ -194,6 +195,49 @@ class Dataset(BaseBIDSDirectory):
         """Saves the description to the file."""
         with self.description_path.open(self._mode) as file:
             json.dump(self.description, file)
+
+    # Participant Fields
+    def create_participant_fields(self) -> None:
+        """Creates participant fields file and saves the participant fields."""
+        with self.participant_fields_path.open(self._mode) as file:
+            json.dump(self.participant_fields, file)
+
+    def load_participant_fields(self) -> dict:
+        """Loads the participant fields from the file.
+
+        Returns:
+            The dataset participant fields.
+        """
+        self.participant_fields.clear()
+        with self.participant_fields_path.open("r") as file:
+            self.participant_fields.update(json.load(file))
+        return self.participant_fields
+
+    def save_participant_fields(self) -> None:
+        """Saves the participant fields to the file."""
+        with self.participant_fields_path.open(self._mode) as file:
+            json.dump(self.participant_fields, file)
+
+    # Participants
+    def create_participants(self) -> None:
+        """Creates participants file and saves the participants."""
+        if self.participants is None:
+            self.participants = pd.DataFrame(columns=["participant_id"])
+
+        self.participants.to_csv(self.participants_path, mode=self._mode, sep="\t")
+
+    def load_participants(self) -> pd.DataFrame:
+        """Loads the participant information from the file.
+
+        Returns:
+            The participant information.
+        """
+        self.participants = participants = pd.read_csv(self.participants_path, sep="\t")
+        return participants
+
+    def save_participants(self) -> None:
+        """Saves the participants to the file."""
+        self.participants.to_csv(self.participants_path, mode=self._mode, sep="\t")
 
     # Subject
     def load_subjects(self, names: Iterable[str] | None = None, mode: str | None = None, load: bool = True) -> None:

@@ -13,3 +13,8 @@ __email__ = __email__
 
 # Imports #
 # Local Packages #
+from .anatomypiaimporter import AnatomyPiaImporter
+from .ctpiaimporter import CTPiaImporter
+from .sessionpiaimporter import SessionPiaImporter
+from .subjectpiaimporter import SubjectPiaImporter
+from .datasetpiaimporter import DatasetPiaImporter
