@@ -13,24 +13,22 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
+from collections.abc import Iterable
 import json
 from pathlib import Path
-from typing import Any
-
-import pandas as pd
+from typing import ClassVar, Any
 
 # Third-Party Packages #
-from baseobjects import BaseComposite
-from baseobjects.cachingtools.cachingobject import CachingObject
 from baseobjects.objects.dispatchableclass import DispatchableClass
 
 # Local Packages #
+from ..base import BaseBIDSDirectory
 from ..modalities import Modality
 
 
 # Definitions #
 # Classes #
-class Session(CachingObject, DispatchableClass):
+class Session(BaseBIDSDirectory, DispatchableClass):
     """A base class which defines a Session and dispatches a specific Session subclass based on meta information.
 
     Class Attributes:
@@ -38,7 +36,7 @@ class Session(CachingObject, DispatchableClass):
         name: The name of which the subclass will be registered as.
         register: A register of all subclasses of this class.
         registration: Determines if this class/subclass will be added to the register.
-        default_meta_info: The default meta information about the session.
+        meta_information: The default meta information about the session.
 
     Attributes:
         _path: The path to session.
@@ -58,18 +56,12 @@ class Session(CachingObject, DispatchableClass):
         kwargs: The keyword arguments for inheritance if any.
     """
 
+    # Class Attributes #
     register: dict[str, dict[str, type]] = {}
     registration: bool = True
-    default_meta_info: dict[str, Any] = {
-        "SessionNamespace": "",
-        "SessionType": "",
-    }
-    default_modalities: dict[str, Any] = {}
-    default_importers: dict[str, type] = {}
-    default_exporters: dict[str, type] = {}
+    default_modalities: ClassVar[dict[str, tuple[type[Modality], dict[str, Any]]]] = {}
 
     # Class Methods #
-    # register
     @classmethod
     def register_class(cls, namespace: str | None = None, name: str | None = None) -> None:
         """Registers this class with the given namespace and name.
@@ -79,7 +71,7 @@ class Session(CachingObject, DispatchableClass):
             name: The name of the subclass.
         """
         super().register_class(namespace=namespace, name=name)
-        cls.default_meta_info.update(SessionNamespace=cls.register_namespace, SessionType=cls.register_name)
+        cls.meta_information.update(SessionNamespace=cls.register_namespace, SessionType=cls.register_name)
 
     @classmethod
     def get_class_information(
@@ -103,7 +95,7 @@ class Session(CachingObject, DispatchableClass):
             The namespace and name of the class.
         """
         if path is not None:
-            if not isinstance(path, Path):  # NOTE: path was parent_path on this line
+            if not isinstance(path, Path):
                 path = Path(path)
 
             if name is None:
@@ -111,17 +103,37 @@ class Session(CachingObject, DispatchableClass):
         elif parent_path is not None and name is not None:
             path = (parent_path if isinstance(parent_path, Path) else Path(parent_path)) / f"ses-{name}"
         else:
-            raise ValueError("Either path or (parent_path and name) must be given to disptach class.")
+            raise ValueError("Either path or (parent_path and name) must be given to dispatch class.")
 
         parent_name = path.parts[-2][4:]
 
         meta_info_path = path / f"sub-{parent_name}_ses-{name}_meta.json"
         if not meta_info_path.exists():
-            info = cls.default_meta_info
+            info = cls.meta_information
         else:
             with meta_info_path.open("r") as file:
                 info = json.load(file)
         return info["SessionNamespace"], info["SessionType"]
+
+    # Attributes #
+    subject_name: str | None = None
+
+    meta_information: dict[str, Any] = {
+        "SessionNamespace": "",
+        "SessionType": "",
+    }
+    modalities: dict[str, Any] = {}
+
+    # Properties #
+    @property
+    def directory_name(self) -> str:
+        """The directory name of this Session."""
+        return f"ses-{self.name}"
+
+    @property
+    def full_name(self) -> str:
+        """The full name of this Session."""
+        return f"sub-{self.subject_name}_ses-{self.name}"
 
     # Magic Methods #
     # Construction/Destruction
@@ -130,26 +142,17 @@ class Session(CachingObject, DispatchableClass):
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
-        mode: str = "r",
+        mode: str | None = None,
         create: bool = False,
+        build: bool = True,
         load: bool = True,
+        modalities_to_load: list[str] | None = None,
         *,
         init: bool = True,
         **kwargs: Any,
     ) -> None:
         # New Attributes #
-        self._path: Path | None = None
-        self._is_open: bool = False
-        self._mode: str = "r"
-
-        self.name: str | None = None
-        self.parent_name: str | None = None
-
-        self.meta_info: dict = self.default_meta_info.copy()
-        self.modalities: dict[str, Any] = {}
-
-        self.importers: dict[str, type] = self.default_importers.copy()
-        self.exporters: dict[str, type] = self.default_exporters.copy()
+        self.modalities = {}
 
         # Parent Attributes #
         super().__init__(init=False)
@@ -162,32 +165,11 @@ class Session(CachingObject, DispatchableClass):
                 parent_path=parent_path,
                 mode=mode,
                 create=create,
+                build=build,
                 load=load,
+                modalities_to_load=modalities_to_load,
                 **kwargs,
             )
-
-    @property
-    def path(self) -> Path | None:
-        """The path to the session."""
-        return self._path  # WARN: path can be none
-
-    @path.setter
-    def path(self, value: str | Path) -> None:
-        if isinstance(value, Path) or value is None:
-            self._path = value
-        else:
-            self._path = Path(value)
-
-    @property
-    def full_name(self) -> str:
-        """The fill name of this session, including subject."""
-        return f"sub-{self.parent_name}_ses-{self.name}"
-
-    @property
-    def meta_info_path(self) -> Path:
-        """The path to the meta information json file."""
-        assert self._path is not None
-        return self._path / f"{self.full_name}_meta.json"
 
     # Instance Methods #
     # Constructors/Destructors
@@ -198,103 +180,125 @@ class Session(CachingObject, DispatchableClass):
         parent_path: Path | str | None = None,
         mode: str | None = None,
         create: bool = False,
-        load: bool = False,
+        build: bool = True,
+        load: bool = True,
+        modalities_to_load: list[str] | None = None,
         **kwargs: Any,
     ) -> None:
         """Constructs this object.
 
         Args:
-            path: The path to the session's directory.
-            name: The name of the session.
-            parent_path: The parent path of this session.
-            mode: The file mode to set this session to.
-            create: Determines if this session will be created if it does not exist.
+            path: The path to the subject's directory.
+            name: The ID name of the subject.
+            parent_path: The parent path of this subject.
+            mode: The file mode to set this subject to.
+            create: Determines if this subject will be created if it does not exist.
+            load: Determines if the sessions will be loaded from the subject's directory.
             kwargs: The keyword arguments for inheritance if any.
         """
-        if name is not None:
-            self.name = name
+        # Construct Parent #
+        super().construct(
+            path=path,
+            name=name,
+            parent_path=parent_path,
+            mode=mode,
+            **kwargs,
+        )
 
-        if path is not None:
-            self.path = path
-
+        # Name and Path resolution
         if self.path is not None:
             if name is None:
                 self.name = self.path.stem[4:]
         elif parent_path is not None and self.name is not None:
-            self.path = (parent_path if isinstance(parent_path, Path) else Path(parent_path)) / f"ses-{self.name}"
-
-        assert self.path is not None
-        # if self.path is not None:
-        self.parent_name = self.path.parts[-2][4:]
-
-        if mode is not None:
-            self._mode = mode
-
-        if not load:
-            self.build_default_modalities()
+            self.path = (parent_path if isinstance(parent_path, Path) else Path(parent_path)) / self.directory_name
 
         if self.path is not None:
-            if load and self.path.exists():
-                self.load_modalities()
-            elif create:
-                self.create()
+            self.subject_name = self.path.parts[-2][4:]
 
-        super().construct(**kwargs)
+        # Create or Load
+        if self.path is not None:
+            if not self.path.exists():
+                self.construct_modalities()
+                if create:
+                    self.create(build=build)
+            elif load:
+                self.load(modalities_to_load)
 
-    def create_meta_info(self) -> None:
-        """Creates meta information file and saves the meta information."""
-        with self.meta_info_path.open(self._mode) as file:
-            json.dump(self.meta_info, file)
+    def build(self) -> None:
+        super().build()
+        self.build_modalities()
 
-    def load_meta_info(self) -> dict:
-        """Loads the meta information from the file.
+    def load(
+        self,
+        names: Iterable[str] | None = None,
+        mode: str | None = None,
+        load: bool = True,
+        **kwargs: Any,
+    ) -> None:
+        super().load()
+        self.load_modalities(names, mode, load)
 
-        Returns:
-            The session meta information.
-        """
-        self.meta_info.clear()
-        with self.meta_info_path.open("r") as file:
-            self.meta_info.update(json.load(file))
-        return self.meta_info
+    # Modalities
+    def construct_modalities(self) -> None:
+        # Use an iterator to construct modalities
+        self.modalities.update(
+            (name, modality_type(parent_path=self.path, mode=self._mode, **kwargs))  # The key and modality to add
+            for name, (modality_type, kwargs) in self.default_modalities.items()  # Iterate over the default modalities
+        )
 
-    def save_meta_info(self) -> None:
-        """Saves the meta information to the file."""
-        with self.meta_info_path.open(self._mode) as file:
-            json.dump(self.meta_info, file)
-
-    def build_default_modalities(self) -> None:
-        for name, modality_type in self.default_modalities.items():
-            self.modalities[name] = modality_type(parent_path=self.path, mode=self._mode)
-
-    def create_modalities(self) -> None:
+    def build_modalities(self) -> None:
         for modality in self.modalities.values():
             modality.create()
 
-    def create(self) -> None:
-        """Creates all contents of the session."""
-        if self.path is not None:
-            self.path.mkdir(exist_ok=True)
-        self.create_meta_info()
-        self.create_modalities()
-
-    def load_modalities(self, mode: str | None = None) -> None:
+    def load_modalities(self, names: Iterable[str] | None = None, mode: str | None = None, load: bool = True) -> None:
         """Loads all modalities in this session."""
-        mode = self._mode if mode is None else mode
+        m = self._mode if mode is None else mode
         self.modalities.clear()
+
+        # Use an iterator to load modalities
         self.modalities.update(
-            {m.name: m for p in self.path.iterdir() if p.is_dir() and (m := Modality(path=p, mode=mode)) is not None},
+            (s.name, s)  # The key and modality to add
+            for p in self.path.iterdir()  # Iterate over the path's contents
+            # Check if the path is a directory and the name is in the names list
+            if p.is_dir() and (names is None or any(n in p.stem for n in names)) and
+            # Create a modality and check if it is valid
+            (s := Modality(path=p, mode=m, load=load)) is not None
         )
 
-    def create_importer(self, type_: str, src_root: Path | None, **kwargs) -> Any:
-        return self.importers[type_](session=self, src_root=src_root, **kwargs)
+    def create_modality(
+        self,
+        modality: type,
+        name: str | None = None,
+        mode: str | None = None,
+        create: bool = True,
+        load: bool = False,
+        **kwargs: Any,
+    ) -> Modality:
+        """Create a new session for this subject with a given session type and arguments.
 
-    def create_exporter(self, type_):
-        return self.exporters[type_](session=self)
+        Args:
+            modality: The type of session to create.
+            name: The name of the new session, defaults to the latest generated name.
+            mode: The file mode to set the session to, defaults to the subject's mode.
+            create: Determines if the session will create its contents.
+            load: Determines if the sessions will be loaded from the subject's directory.
+            **kwargs: The keyword arguments for the session.
 
-    def add_importer(self, type_: str, importer: type, overwrite: bool = False):
-        if type_ not in self.importers or overwrite:
-            self.importers[type_] = importer
+        Returns:
+            The newly created session.
+        """
+        if name is None:
+            name = modality.name
 
-    def add_exporter(self, type_: str, exporter: type, overwrite: bool = False):
-        if type_ not in self.exporters or overwrite:
-            self.exporters[type_] = exporter
+        if mode is None:
+            mode = self._mode
+
+        self.modalities[name] = new_modality = modality(
+            name=name,
+            parent_path=self.path,
+            mode=mode,
+            create=create,
+            load=load,
+            **kwargs,
+        )
+        return new_modality

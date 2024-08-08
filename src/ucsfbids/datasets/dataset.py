@@ -11,22 +11,23 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
-from pathlib import Path
-from typing import Any
-
 # Imports #
 # Standard Libraries #
-from baseobjects import BaseComposite
-
-# Local Packages #
-from ..subjects import Subject
+from collections.abc import Iterable
+from pathlib import Path
+import json
+from typing import Any
 
 # Third-Party Packages #
+
+# Local Packages #
+from ..base import BaseBIDSDirectory
+from ..subjects import Subject
 
 
 # Definitions #
 # Classes #
-class Dataset(BaseComposite):
+class Dataset(BaseBIDSDirectory):
     """A subject in the UCSF BIDS format.
 
     Attributes:
@@ -47,34 +48,57 @@ class Dataset(BaseComposite):
         kwargs: The keyword arguments for inheritance if any.
     """
 
-    default_importers: dict[str, type] = {}
-    default_exporters: dict[str, type] = {}
+    # Attributes #
+    subject_prefix: str = "S"
+    subject_digits: int = 4
+
+    meta_information: dict[str, Any] = {
+        "DatasetNamespace": "",
+        "DatasetType": "",
+    }
+
+    description: dict[str, Any] = {
+        "Name": "Default name, should be updated",
+        "BIDSVersion": "1.6.0",
+        "DatasetType": "raw",
+    }
+    
+    subjects: dict[str, Subject]
+
+    # Properties #
+    @property
+    def directory_name(self) -> str:
+        """The directory name of this Dataset."""
+        return self.name
+
+    @property
+    def full_name(self) -> str:
+        """The full name of this Dataset."""
+        return self.name
+
+    @property
+    def description_path(self) -> Path:
+        """The path to the description json file."""
+        return self._path / f"dataset_description.json"
 
     # Magic Methods #
     # Construction/Destruction
     def __init__(
         self,
-        subjects_to_load: list[str] | None,
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
-        mode: str = "r",
+        mode: str | None = None,
         create: bool = False,
-        load: bool = True,
+        build: bool = True,
+        load: bool = False,
+        subjects_to_load: list[str] | None = None,
         *,
         init: bool = True,
         **kwargs: Any,
     ) -> None:
         # New Attributes #
-        self._path: Path | None = None
-        self._mode: str = "r"
-
-        self.name: str | None = None
-
-        self.subjects: dict[str, Subject] = {}
-
-        self.importers: dict[str, type] = self.default_importers.copy()
-        self.exporters: dict[str, type] = self.default_exporters.copy()
+        self.subjects = {}
 
         # Parent Attributes #
         super().__init__(init=False)
@@ -87,22 +111,11 @@ class Dataset(BaseComposite):
                 parent_path=parent_path,
                 mode=mode,
                 create=create,
+                build=build,
                 load=load,
                 subjects_to_load=subjects_to_load,
                 **kwargs,
             )
-
-    @property
-    def path(self) -> Path | None:
-        """The path to the subject."""
-        return self._path
-
-    @path.setter
-    def path(self, value: str | Path) -> None:
-        if isinstance(value, Path) or value is None:
-            self._path = value
-        else:
-            self._path = Path(value)
 
     # Instance Methods #
     # Constructors/Destructors
@@ -113,7 +126,8 @@ class Dataset(BaseComposite):
         parent_path: Path | str | None = None,
         mode: str | None = None,
         create: bool = False,
-        load: bool = False,
+        build: bool = True,
+        load: bool = True,
         subjects_to_load: list[str] | None = None,
         **kwargs: Any,
     ) -> None:
@@ -128,74 +142,92 @@ class Dataset(BaseComposite):
             load: Determines if the sessions will be loaded from the subject's directory.
             kwargs: The keyword arguments for inheritance if any.
         """
-        if name is not None:
-            self.name = name
+        # Construct Parent #
+        super().construct(
+            path=path,
+            name=name,
+            parent_path=parent_path,
+            mode=mode,
+            **kwargs,
+        )
 
-        if path is not None:
-            self.path = Path(path)
-
-        if mode is not None:
-            self._mode = mode
-
+        # Create or Load
         if self.path is not None:
-            if name is None:
-                self.name = self.path.stem
-        elif parent_path is not None and self.name is not None:
-            self.path = (
-                parent_path if isinstance(parent_path, Path) else Path(parent_path)
-            ) / f"{self.name}"
+            if not self.path.exists():
+                if create:
+                    self.create(build=build)
+            elif load:
+                self.load(subjects_to_load)
 
-        if self.path is not None:
-            if load and self.path.exists():
-                self.load_subjects(subjects_to_load)
-            elif create:
-                self.create()
+    def build(self) -> None:
+        super().build()
+        self.create_description()
 
-        super().construct(**kwargs)
-
-    def create(self) -> None:
-        """Creates and sets up the subject's directory."""
-        assert self.path is not None
-        self.path.mkdir(exist_ok=True)
-
-    def load_subjects(
+    def load(
         self,
-        subjects_to_load: list[str] | None = None,
+        names: Iterable[str] | None = None,
         mode: str | None = None,
         load: bool = True,
+        **kwargs: Any,
     ) -> None:
-        """Loads all sessions in this subject."""
-        assert self.path is not None
+        super().load()
+        self.load_subjects(names, mode, load)
+
+    # Description
+    def create_description(self) -> None:
+        """Creates description file and saves the description."""
+        with self.description_path.open(self._mode) as file:
+            json.dump(self.description, file)
+
+    def load_description(self) -> dict:
+        """Loads the description from the file.
+
+        Returns:
+            The dataset description.
+        """
+        self.description.clear()
+        with self.description_path.open("r") as file:
+            self.description.update(json.load(file))
+        return self.description
+
+    def save_description(self) -> None:
+        """Saves the description to the file."""
+        with self.description_path.open(self._mode) as file:
+            json.dump(self.description, file)
+
+    # Subject
+    def load_subjects(self, names: Iterable[str] | None = None, mode: str | None = None, load: bool = True) -> None:
+        """Loads all subjects in this dataset."""
         m = self._mode if mode is None else mode
         self.subjects.clear()
-        subjects_to_update = {}
-        for p in self.path.iterdir():
-            if subjects_to_load is not None and not any(
-                [sub in p.as_posix() for sub in subjects_to_load]
-            ):
-                continue
-            if not p.is_dir():
-                continue
-            if (s := Subject(path=p, mode=m, load=load)) is None:
-                continue
-            subjects_to_update[s.name] = s
 
-        self.subjects.update(subjects_to_update)
+        # Use an iterator to load subjects
+        self.subjects.update(
+            (s.name, s)  # The key and subject to add
+            for p in self.path.iterdir()  # Iterate over the path's contents
+            # Check if the path is a directory and the name is in the names list
+            if p.is_dir() and (names is None or any(n in p.stem for n in names)) and
+            # Create a subject and check if it is valid
+            (s := Subject(path=p, mode=m, load=load)) is not None
+        )
 
-    def generate_latest_subject_name(self) -> str:
-        """Generates a session name for a new latest session.
+    def generate_latest_subject_name(self, prefix: str | None = None, digits: int | None = None) -> str:
+        """Generates a subject name for a new latest subject.
 
         Returns:
             The name of the latest session to create.
         """
-        return f"S{len(self.subjects):04d}"
+        if prefix is None:
+            prefix = self.subject_prefix
+        if digits is None:
+            digits = self.subject_digits
+        return f"{prefix}{len(self.subjects):0{digits}d}"
 
-    def create_new_subject(
+    def create_subject(
         self,
         subject: type[Subject],
         name: str | None = None,
         mode: str | None = None,
-        load: bool = False,
         create: bool = True,
         **kwargs: Any,
     ) -> Subject:
@@ -221,22 +253,7 @@ class Dataset(BaseComposite):
             name=name,
             parent_path=self.path,
             mode=mode,
-            load=load,
             create=create,
             **kwargs,
         )
         return new_subject
-
-    def create_importer(self, type_: str, src_root: Path | None, **kwargs) -> Any:
-        return self.importers[type_](dataset=self, src_root=src_root, **kwargs)
-
-    def create_exporter(self, type_: str) -> Any:
-        return self.exporters[type_](dataset=self)
-
-    def add_importer(self, type_: str, importer: type, overwrite: bool = False):
-        if type_ not in self.importers or overwrite:
-            self.importers[type_] = importer
-
-    def add_exporter(self, type_: str, exporter: type, overwrite: bool = False):
-        if type_ not in self.exporters or overwrite:
-            self.exporters[type_] = exporter

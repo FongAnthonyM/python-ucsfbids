@@ -33,7 +33,7 @@ class CDFSSession(Session):
         name: The name of which the subclass will be registered as.
         registry: A registry of all subclasses of this class.
         registration: Determines if this class/subclass will be added to the registry.
-        default_meta_info: The default meta information about the session.
+        meta_information: The default meta information about the session.
         cdfs_type: The type of CDFS the session objects of this class will use.
 
     Attributes:
@@ -55,6 +55,6 @@ class CDFSSession(Session):
         kwargs: The keyword arguments for inheritance.
     """
 
-    default_meta_info: dict[str, Any] = Session.default_meta_info.copy()
+    meta_information: dict[str, Any] = Session.meta_information.copy()
     default_modalities: dict[str, type[Modality]] = {"anat": Anatomy, "ct": CT, "ieeg": IEEGCDFS}
     default_exporters: dict[str, type] = {"BIDS": SessionBIDSExporter}

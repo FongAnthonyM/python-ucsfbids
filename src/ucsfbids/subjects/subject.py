@@ -11,23 +11,22 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
-import json
-from pathlib import Path
-from typing import Any, Optional
-
 # Imports #
 # Standard Libraries #
-from baseobjects import BaseComposite
-
-# Local Packages #
-from ..sessions import Session
+from collections.abc import Iterable
+from pathlib import Path
+from typing import Any
 
 # Third-Party Packages #
+
+# Local Packages #
+from ..base import BaseBIDSDirectory
+from ..sessions import Session
 
 
 # Definitions #
 # Classes #
-class Subject(BaseComposite):
+class Subject(BaseBIDSDirectory):
     """A subject in the UCSF BIDS format.
 
     Attributes:
@@ -47,12 +46,6 @@ class Subject(BaseComposite):
         init: Determines if this object will construct.
         kwargs: The keyword arguments for inheritance if any.
     """
-
-    default_meta_info: dict[str, Any] = {
-        "SubjectNamespace": "",
-    }
-    default_importers: dict[str, type] = {}
-    default_exporters: dict[str, type] = {}
 
     # @classmethod
     # def get_class_information(
@@ -86,11 +79,31 @@ class Subject(BaseComposite):
     #     else:
     #         raise ValueError("Either path or (parent_path and name) must be given to disptach class.")
     #
-    #     meta_info_path = path / f"sub-{name}_meta.json"
-    #     with meta_info_path.open("r") as file:
+    #     meta_information_path = path / f"sub-{name}_meta.json"
+    #     with meta_information_path.open("r") as file:
     #         info = json.load(file)
     #
     #     return info["SubjectNamespace"]
+
+    # Attributes #
+    session_prefix: str = "S"
+    session_digits: int = 4
+
+    meta_information: dict[str, Any] = {
+        "SubjectNamespace": "",
+    }
+    sessions: dict[str, Session]
+
+    # Properties #
+    @property
+    def directory_name(self) -> str:
+        """The directory name of this Subject."""
+        return f"sub-{self.name}"
+
+    @property
+    def full_name(self) -> str:
+        """The full name of this Subject."""
+        return f"sub-{self.name}"
 
     # Magic Methods #
     # Construction/Destruction
@@ -99,25 +112,17 @@ class Subject(BaseComposite):
         path: Path | str | None = None,
         name: str | None = None,
         parent_path: Path | str | None = None,
-        mode: str = "r",
+        mode: str | None = None,
         create: bool = False,
+        build: bool = True,
         load: bool = True,
+        sessions_to_load: list[str] | None = None,
         *,
         init: bool = True,
         **kwargs: Any,
     ) -> None:
         # New Attributes #
-        self._path: Path | None = None
-        self._mode: str = "r"
-
-        self.name: str | None = None
-        self.parent_name: Optional[str] = None
-
-        self.meta_info: dict = self.default_meta_info.copy()
         self.sessions: dict[str, Session] = {}
-
-        self.importers: dict[str, type] = self.default_importers.copy()
-        self.exporters: dict[str, type] = self.default_exporters.copy()
 
         # Parent Attributes #
         super().__init__(init=False)
@@ -130,30 +135,11 @@ class Subject(BaseComposite):
                 parent_path=parent_path,
                 mode=mode,
                 create=create,
+                build=build,
                 load=load,
+                sessions_to_load=sessions_to_load,
                 **kwargs,
             )
-
-    @property
-    def path(self) -> Optional[Path]:
-        """The path to the subject."""
-        return self._path
-
-    @path.setter
-    def path(self, value: str | Path) -> None:
-        if isinstance(value, Path) or value is None:
-            self._path = value
-        else:
-            self._path = Path(value)
-
-    @property
-    def full_name(self) -> str:
-        return f"sub-{self.name}"
-
-    @property
-    def meta_info_path(self) -> Path:
-        assert self._path is not None
-        return self._path / f"{self.full_name}_meta.json"
 
     # Instance Methods #
     # Constructors/Destructors
@@ -164,7 +150,9 @@ class Subject(BaseComposite):
         parent_path: Path | str | None = None,
         mode: str | None = None,
         create: bool = False,
-        load: bool = False,
+        build: bool = True,
+        load: bool = True,
+        sessions_to_load: list[str] | None = None,
         **kwargs: Any,
     ) -> None:
         """Constructs this object.
@@ -178,80 +166,77 @@ class Subject(BaseComposite):
             load: Determines if the sessions will be loaded from the subject's directory.
             kwargs: The keyword arguments for inheritance if any.
         """
-        if name is not None:
-            self.name = name
+        # Construct Parent #
+        super().construct(
+            path=path,
+            name=name,
+            parent_path=parent_path,
+            mode=mode,
+            **kwargs,
+        )
 
-        if path is not None:
-            self.path = Path(path)
-
-        if mode is not None:
-            self._mode = mode
-
-        if parent_path is not None and self.name is not None and self.path is None:
-            self.path = (parent_path if isinstance(parent_path, Path) else Path(parent_path)) / f"sub-{self.name}"
-
-        assert self.path is not None
-        self.parent_name = self.path.parts[-2]
-        if name is None:
-            self.name = self.path.stem[4:]
-
-        if mode is not None:
-            self._mode = mode
-
+        # Name and Path resolution
         if self.path is not None:
-            if load and self.path.exists():
-                self.load_sessions()
-            elif create:
-                self.create()
+            if name is None:
+                self.name = self.path.stem[4:]
+        elif parent_path is not None and self.name is not None:
+            self.path = (parent_path if isinstance(parent_path, Path) else Path(parent_path)) / self.directory_name
 
-        super().construct(**kwargs)
+        # Create or Load
+        if self.path is not None:
+            if not self.path.exists():
+                if create:
+                    self.create(build=build)
+            elif load:
+                self.load(sessions_to_load)
 
-    def create_meta_info(self) -> None:
-        with self.meta_info_path.open(self._mode) as file:
-            json.dump(self.meta_info, file)
+    def build(self) -> None:
+        super().build()
+        self.build_sessions()
 
-    def load_meta_info(self) -> dict:
-        self.meta_info.clear()
-        with self.meta_info_path.open("r") as file:
-            self.meta_info.update(json.load(file))
-        return self.meta_info
+    def load(
+        self,
+        names: Iterable[str] | None = None,
+        mode: str | None = None,
+        load: bool = True,
+        **kwargs: Any,
+    ) -> None:
+        super().load()
+        self.load_sessions(names, mode, load)
 
-    def save_meta_info(self) -> None:
-        with self.meta_info_path.open(self._mode) as file:
-            json.dump(self.meta_info, file)
-
-    def create_sessions(self) -> None:
+    # Session
+    def build_sessions(self) -> None:
         for session in self.sessions.values():
             session.create()
 
-    def create(self) -> None:
-        """Creates and sets up the subject's directory."""
-        assert self.path is not None
-        self.path.mkdir(exist_ok=True)
-        self.create_meta_info()
-
-    def load_sessions(self, mode: str | None = None, load: bool = True) -> None:
+    def load_sessions(self, names: Iterable[str] | None = None, mode: str | None = None, load: bool = True) -> None:
         """Loads all sessions in this subject."""
-        assert self.path is not None
         m = self._mode if mode is None else mode
         self.sessions.clear()
+
+        # Use an iterator to load sessions
         self.sessions.update(
-            {
-                s.name: s
-                for p in self.path.iterdir()
-                if p.is_dir() and (s := Session(path=p, mode=m, load=load)) is not None
-            },
+            (s.name, s)  # The key and session to add
+            for p in self.path.iterdir()  # Iterate over the path's contents
+            # Check if the path is a directory and the name is in the names list
+            if p.is_dir() and (names is None or any(n in p.stem for n in names)) and
+            # Create a session and check if it is valid
+            (s := Session(path=p, mode=m, load=load)) is not None
         )
 
-    def generate_latest_session_name(self) -> str:
-        """Generates a session name for a new latest session.
+    def generate_latest_session_name(self, prefix: str | None = None, digits: int | None = None) -> str:
+        """Generates a subject name for a new latest subject.
 
         Returns:
             The name of the latest session to create.
         """
-        return f"S{len(self.sessions):04d}"
+        if prefix is None:
+            prefix = self.session_prefix
+        if digits is None:
+            digits = self.session_digits
+        return f"{prefix}{len(self.sessions):0{digits}d}"
 
-    def create_new_session(
+    def create_session(
         self,
         session: type,
         name: str | None = None,
@@ -288,17 +273,3 @@ class Subject(BaseComposite):
             **kwargs,
         )
         return new_session
-
-    def create_importer(self, type_: str, src_root: Path | None, **kwargs) -> Any:
-        return self.importers[type_](subject=self, src_root=src_root, **kwargs)
-
-    def create_exporter(self, type_: str) -> Any:
-        return self.exporters[type_](subject=self)
-
-    def add_importer(self, type_: str, importer: type, overwrite: bool = False):
-        if type_ not in self.importers or overwrite:
-            self.importers[type_] = importer
-
-    def add_exporter(self, type_: str, exporter: type, overwrite: bool = False):
-        if type_ not in self.exporters or overwrite:
-            self.exporters[type_] = exporter

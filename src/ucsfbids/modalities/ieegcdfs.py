@@ -1,5 +1,5 @@
-"""anatomy.py
-A Session which contains a CDFS as part of its structure.
+"""ieegcdfs.py
+
 """
 # Package Header #
 from ..header import *
@@ -13,14 +13,14 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
-from pathlib import Path
 from typing import Any
 
 # Third-Party Packages #
 from cdfs import BaseCDFS
 
 # Local Packages #
-from .exporters import IEEGBIDSExporter
+from ..base import BaseImporter, BaseExporter
+from ...exporters import IEEGBIDSExporter
 from .ieeg import IEEG
 
 
@@ -34,7 +34,7 @@ class IEEGCDFS(IEEG):
         name: The name of which the subclass will be registered as.
         registry: A registry of all subclasses of this class.
         registration: Determines if this class/subclass will be added to the registry.
-        default_meta_info: The default meta information about the session.
+        meta_information: The default meta information about the session.
         cdfs_type: The type of CDFS the session objects of this class will use.
 
     Attributes:
@@ -43,7 +43,7 @@ class IEEGCDFS(IEEG):
         _mode: The file mode of this session.
         meta_info: The meta information that describes this session.
         name: The name of this session.
-        parent_name: The name of the parent subject of this session.
+        subject_name: The name of the parent subject of this session.
         cdfs: The CDFS object of this session.
 
     Args:
@@ -56,41 +56,21 @@ class IEEGCDFS(IEEG):
         kwargs: The keyword arguments for inheritance.
     """
 
-    default_meta_info: dict[str, Any] = IEEG.default_meta_info.copy()
-    default_exporters: dict[str, type] = {"BIDS": IEEGBIDSExporter}
+    # Attributes #
+    meta_information: dict[str, Any] = IEEG.meta_information.copy()
+
     cdfs_type: type[BaseCDFS] = BaseCDFS
+    cdfs: BaseCDFS | None = None
 
-    # Magic Methods #
-    # Construction/Destruction
-    def __init__(
-        self,
-        path: Path | str | None = None,
-        name: str | None = None,
-        parent_path: Path | str | None = None,
-        mode: str = "r",
-        create: bool = False,
-        *,
-        init: bool = True,
-        **kwargs: Any,
-    ) -> None:
-        # New Attributes #
-        self.cdfs: BaseCDFS | None = None
-
-        # Parent Attributes #
-        super().__init__(init=False)
-
-        # Object Construction #
-        if init:
-            self.construct(
-                path=path,
-                name=name,
-                parent_path=parent_path,
-                mode=mode,
-                create=create,
-                **kwargs,
-            )
+    importers: dict[str, tuple[type[BaseImporter], dict[str, Any]]] = {}
+    exporters: dict[str, tuple[type[BaseExporter], dict[str, Any]]] = {"BIDS": (IEEGBIDSExporter, {})}
 
     # Instance Methods #
+    def build(self) -> None:
+        super().build()
+        self.require_cdfs(open_=True)
+        self.cdfs.close()
+
     def generate_contents_file_name(self) -> str:
         """Generates a name for the contents file from the subject and session name.
 
@@ -118,9 +98,3 @@ class IEEGCDFS(IEEG):
         )
         return cdfs
 
-    def create(self) -> None:
-        """Creates and sets up the ieeg directory."""
-        self.path.mkdir(exist_ok=True)
-        self.create_meta_info()
-        self.require_cdfs(open_=True)
-        self.cdfs.close()

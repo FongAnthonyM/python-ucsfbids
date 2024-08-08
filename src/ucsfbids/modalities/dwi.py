@@ -1,5 +1,5 @@
-"""anatomy.py
-A Session which contains a CDFS as part of its structure.
+"""dwi.py
+
 """
 # Package Header #
 from ..header import *
@@ -11,17 +11,14 @@ __maintainer__ = __maintainer__
 __email__ = __email__
 
 
-from pathlib import Path
-from typing import Any
-
 # Imports #
 # Standard Libraries #
+from typing import Any
 
 # Third-Party Packages #
 
-from .exporters import AnatomyBIDSExporter
-
 # Local Packages #
+from ..base import BaseImporter, BaseExporter
 from .modality import Modality
 
 
@@ -35,7 +32,7 @@ class DWI(Modality):
         name: The name of which the subclass will be registered as.
         registry: A registry of all subclasses of this class.
         registration: Determines if this class/subclass will be added to the registry.
-        default_meta_info: The default meta information about the session.
+        meta_information: The default meta information about the session.
         cdfs_type: The type of CDFS the session objects of this class will use.
 
     Attributes:
@@ -44,7 +41,7 @@ class DWI(Modality):
         _mode: The file mode of this session.
         meta_info: The meta information that describes this session.
         name: The name of this session.
-        parent_name: The name of the parent subject of this session.
+        subject_name: The name of the parent subject of this session.
         cdfs: The CDFS object of this session.
 
     Args:
@@ -57,42 +54,10 @@ class DWI(Modality):
         kwargs: The keyword arguments for inheritance.
     """
 
-    default_meta_info: dict[str, Any] = Modality.default_meta_info.copy()
-    default_name: str = "dti"
-    default_exporters: dict[str, type] = {"BIDS": AnatomyBIDSExporter}
-    default_importers: dict[str, type] = {}
+    # Attributes #
+    name: str = "dti"
 
-    # Magic Methods #
-    # Construction/Destruction
-    def __init__(
-        self,
-        path: Path | str | None = None,
-        name: str | None = None,
-        parent_path: Path | str | None = None,
-        mode: str = "r",
-        create: bool = False,
-        *,
-        init: bool = True,
-        **kwargs: Any,
-    ) -> None:
-        # New Attributes #
+    meta_information: dict[str, Any] = Modality.meta_information.copy()
 
-        # Parent Attributes #
-        super().__init__(init=False)
-
-        # Object Construction #
-        if init:
-            self.construct(
-                path=path,
-                name=name,
-                parent_path=parent_path,
-                mode=mode,
-                create=create,
-                **kwargs,
-            )
-
-    # Instance Methods #
-    def create(self) -> None:
-        """Creates and sets up the anat directory."""
-        self.path.mkdir(exist_ok=True)
-        self.create_meta_info()
+    importers: dict[str, tuple[type[BaseImporter], dict[str, Any]]] = {}
+    exporters: dict[str, tuple[type[BaseExporter], dict[str, Any]]] = {}
